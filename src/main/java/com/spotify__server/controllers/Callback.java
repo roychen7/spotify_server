@@ -34,12 +34,10 @@ import org.springframework.web.bind.annotation.RestController;
  *
  * @author roychen
  */
-// https://accounts.spotify.com/authorize?client_id=ba2aa172bb954f54be32398e8120381c&response_type=code&scope=user-modify-playback-state&redirect_uri=http://localhost:8080/callback
+// 
 @RestController
 public class Callback {
     
-//    @GetMapping("/callback")
-//    @ResponseBody
     @RequestMapping("/callback")
     public ResponseEntity callback(@RequestParam String code) throws MalformedURLException, IOException, JSONException, ParseException {
         // initializing client and httpPost
@@ -50,45 +48,24 @@ public class Callback {
         httpPost.setHeader("Authorization", "Basic YmEyYWExNzJiYjk1NGY1NGJlMzIzOThlODEyMDM4MWM6MzI2ZGIwM2E2ODQwNGUwYWIwODhjYWNjMDZlYzU4OTY=");
         httpPost.setHeader("content-type", "application/x-www-form-urlencoded");
         
-        // adding body for post request
-        JSONObject json = new JSONObject();
-//        json.put("grant_type", "authorization_code");
-//        json.put("code", code);
-//        json.put("redirect_uri", "http://localhost:8080/callback");
-//        json.put("scope", "user-modify-playback-state");
-//        System.out.println(json.toString());
-////        
-////        // executing post request
-//          String s = json.toString();
-//          String format = s.replaceAll("\\\\", "");
-//          StringEntity se = new StringEntity(format, "UTF-8");
-//          httpPost.setEntity(se);
+        // adding body for post request   
+        List<NameValuePair> params = new ArrayList<>(2);
+        params.add(new BasicNameValuePair("grant_type", "authorization_code"));
+        params.add(new BasicNameValuePair("code", code));
+        params.add(new BasicNameValuePair("redirect_uri", "http://localhost:8080/callback"));
+        params.add(new BasicNameValuePair("scope", "user-modify-playback-state"));
+        httpPost.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
 
-            // trying another method of posting
-            
-          List<NameValuePair> params = new ArrayList<>(2);
-          params.add(new BasicNameValuePair("grant_type", "authorization_code"));
-          params.add(new BasicNameValuePair("code", code));
-          params.add(new BasicNameValuePair("redirect_uri", "http://localhost:8080/callback"));
-          params.add(new BasicNameValuePair("scope", "user-modify-playback-state"));
-          httpPost.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
-            
-          System.out.println("BEFORE THE POST: " + EntityUtils.toString(httpPost.getEntity()));
-
-          HttpResponse response = client.execute(httpPost);
+        HttpResponse response = client.execute(httpPost);
           
-          HttpEntity entity = response.getEntity();
-//          String jsonString = EntityUtils.toString(entity);
-            String jsonString = getResponseString(entity);
-          System.out.println(jsonString);
-//          JSONObject object = new JSONObject(jsonString);
+        HttpEntity entity = response.getEntity();
+        String jsonString = getResponseString(entity);
+        System.out.println(jsonString);
           
-            return new ResponseEntity<>(jsonString, HttpStatus.ACCEPTED); 
-          
-//        return new ResponseEntity<>("HI", HttpStatus.ACCEPTED);
-//          return response
+        return new ResponseEntity<>(jsonString, HttpStatus.ACCEPTED); 
         }
     
+    // code taken from https://stackoverflow.com/questions/3324717/sending-http-post-request-in-java
     public static String getResponseString(HttpEntity entity) {
     StringBuilder builder = new StringBuilder();
     if (entity != null) {

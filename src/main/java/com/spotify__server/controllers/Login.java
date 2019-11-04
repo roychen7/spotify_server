@@ -46,12 +46,7 @@ public class Login {
 //        }
 //        return new ResponseEntity<>("Hello World updated!", headers, HttpStatus.ACCEPTED);
 //          Thread.sleep(5000);
-          Connection con = JdbcRepository.getConnection();
-          if (con != null) {
-             return new ResponseEntity<>("DB CONNECTED!", headers, HttpStatus.ACCEPTED);
-
-          } else {
-          return new ResponseEntity<>("DB not connected :(!", headers, HttpStatus.ACCEPTED);
-          }
+            return new ResponseEntity<>("hi", HttpStatus.ACCEPTED);
+          
     }
 }
