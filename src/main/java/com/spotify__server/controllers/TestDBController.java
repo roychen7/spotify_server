@@ -22,15 +22,15 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class TestDBController {
     
-    @RequestMapping("/hello") 
-    public String DBConnected() throws SQLException, IOException {
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Access-Control-Allow-Origin", "http://localhost:1234");
-        Connection con = JdbcRepository.getConnection();
-          if (con != null) {
-             return "DB CONNECTED";
-          } else {
-          return "DB NOt connected";
-          }
-    }
+//    @RequestMapping("/hello") 
+//    public String DBConnected() throws SQLException, IOException {
+//        HttpHeaders headers = new HttpHeaders();
+//        headers.set("Access-Control-Allow-Origin", "http://localhost:1234");
+////        Connection con = JdbcRepository.getConnection();
+//          if (con != null) {
+//             return "DB CONNECTED";
+//          } else {
+//          return "DB NOt connected";
+//          }
+//    }
 }
