@@ -15,7 +15,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.spotify__server.repositories.JdbcRepository;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+import org.apache.http.HttpResponse;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.web.bind.annotation.GetMapping;
 
 /**
  *
@@ -24,7 +30,23 @@ import org.springframework.jdbc.core.JdbcTemplate;
 @RestController
 public class Login {
     
-    @RequestMapping("/login")
+    @GetMapping("/token")
+    public ResponseEntity tokenExists() throws SQLException, IOException {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Access-Control-Allow-Origin", "http://localhost:3000");
+        
+        System.out.println("Inside token endpoint");
+        Connection conn = JdbcRepository.getConnection();
+        Statement stmt = conn.createStatement();
+        
+        ResultSet rs = stmt.executeQuery("select * from `token`");
+        rs.next();
+        String s = rs.getString(1);
+        System.out.println(s);
+        return new ResponseEntity(s, headers, HttpStatus.ACCEPTED);     
+    }   
+    
+    @GetMapping("/login")
     public ResponseEntity login() throws MalformedURLException, IOException, InterruptedException, SQLException {
 //        URL obj = new URL("https://www.google.com");
 //        HttpURLConnection con = (HttpURLConnection) obj.openConnection();
@@ -48,7 +70,7 @@ public class Login {
 //        return new ResponseEntity<>("Hello World updated!", headers, HttpStatus.ACCEPTED);
 //          Thread.sleep(5000);
             
+            
             return new ResponseEntity<>("hi", HttpStatus.ACCEPTED);
-          
     }
 }

@@ -47,7 +47,7 @@ import java.sql.Statement;
 @RestController
 public class Callback {
 
-    @RequestMapping("/callback")
+    @RequestMapping("/callback") 
     public ResponseEntity callback(@RequestParam String code) throws MalformedURLException, IOException, JSONException, ParseException, SQLException {
         // initializing client and httpPost
         HttpClient client = HttpClients.createDefault();
@@ -82,7 +82,7 @@ public class Callback {
                 String s = (String) jsonObj.get("access_token");
                 Statement stmt = conn.createStatement();
 //                String str = "insert into `token` (`access_token`) values ('" + s + "')";
-                  String str = "insert into `token` (`access_token`) values (NULL)";
+                  String str = "insert into `token` (`access_token`) values ('nigeria!')";
                 Integer rset = stmt.executeUpdate(str);
                 return new ResponseEntity<>("got past rset!", HttpStatus.ACCEPTED);
                 
