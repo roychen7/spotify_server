@@ -49,7 +49,7 @@ public class Callback {
 
     @RequestMapping("/callback") 
     public ResponseEntity callback(@RequestParam String code) throws MalformedURLException, IOException, JSONException, ParseException, SQLException {
-        // initializing client and httpPost
+        // initializing client and httpPost (post request is to get access token from given access code in req URL)
         HttpClient client = HttpClients.createDefault();
         HttpPost httpPost = new HttpPost("https://accounts.spotify.com/api/token/");
         
@@ -65,34 +65,29 @@ public class Callback {
         params.add(new BasicNameValuePair("scope", "user-modify-playback-state"));
         httpPost.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
 
+        // execute the post, save response
         HttpResponse response = client.execute(httpPost);
-          
+        
+        // get string format of response
         HttpEntity entity = response.getEntity();
         String jsonString = getResponseString(entity);
-//        System.out.println(jsonString);
         
+        // parse response string into json object
         JSONParser parser = new JSONParser();
         JSONObject jsonObj = (JSONObject) parser.parse(jsonString);
 
-//        return rep.getAccessToken();
-//        int res = template.update("INSERT INTO access_token VALUES (?)", jsonObj.get("access_token"));
+        // insert the access token from post response into database, return a "loading" screen
         Connection conn = JdbcRepository.getConnection();
-        if (conn != null) {
-                String s = (String) jsonObj.get("access_token");
-                Statement stmt = conn.createStatement();
-                String str = "insert into `token` (`access_token`) values ('" + s + "')";
-//                  String str = "insert into `token` (`access_token`) values ("'" + s + "'"")";
-                Integer rset = stmt.executeUpdate(str);
-                System.out.println("inserted access token inside db!");
-                return new ResponseEntity<>("Loading...", HttpStatus.ACCEPTED);
-                
-//        return new ResponseEntity<>(s, HttpStatus.ACCEPTED); 
-        } else {
-            return new ResponseEntity<>("HI :(", HttpStatus.ACCEPTED);
-        }
+        String s = (String) jsonObj.get("access_token");
+        Statement stmt = conn.createStatement();
+        String str = "insert into `token` (`access_token`) values ('" + s + "')";
+        Integer rset = stmt.executeUpdate(str);
+        System.out.println("inserted access token inside db!");
+        return new ResponseEntity<>("Loading...", HttpStatus.ACCEPTED);
         }
     
     // code taken from https://stackoverflow.com/questions/3324717/sending-http-post-request-in-java
+    // This function turns an httpentity into string format
     public static String getResponseString(HttpEntity entity) {
     StringBuilder builder = new StringBuilder();
     if (entity != null) {

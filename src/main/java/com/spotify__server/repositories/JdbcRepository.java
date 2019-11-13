@@ -13,14 +13,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
-import javax.annotation.PostConstruct;
-import javax.sql.DataSource;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -30,8 +22,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class JdbcRepository {
  
+    // gets and returns a connection to mysql database according to properties in applocation.properties file 
     public static Connection getConnection() throws SQLException, FileNotFoundException, IOException {
-        DriverManagerDataSource dataSource = new DriverManagerDataSource();
         
         try {
             FileInputStream f = new FileInputStream("src/main/resources/application.properties");
@@ -41,16 +33,10 @@ public class JdbcRepository {
             String url = p.getProperty("spring.datasource.url");
             String username = p.getProperty("spring.datasource.username");
             String password = p.getProperty("spring.datasource.password");
-            
-//            dataSource.setDriverClassName("com.mysql.jdbc.Driver");
-//            dataSource.setUrl(url);
-//            dataSource.setUsername(username);
-//            dataSource.setPassword(password);
-            
+
             return DriverManager.getConnection(url, username, password);
         } catch (IOException e) {
             throw e;
         }
-//        return dataSource;
     }
 }

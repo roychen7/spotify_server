@@ -17,23 +17,10 @@ import org.apache.http.impl.client.HttpClients;
  * @author roychen
  */
 public class VerifyToken {
-    ////        URL url = new URL("https://accounts.spotify.com/authorize?client_id=ba2aa172bb954f54be32398e8120381c&response_type=code&scope=user-modify-playback-state&redirect_uri=http://localhost:8080/callback");
-////        HttpURLConnection con = (HttpURLConnection) url.openConnection();
-////        con.setRequestMethod("GET");
-//        HttpGet get = new HttpGet("https://accounts.spotify.com/authorize?client_id=ba2aa172bb954f54be32398e8120381c&response_type=code&scope=user-modify-playback-state&redirect_uri=http://localhost:8080/callback");
-//        HttpClient client = HttpClients.createDefault();
-//        
-//        try {
-//        HttpResponse response = client.execute(get);
-//        HttpEntity entity =  response.getEntity();
-//        return new ResponseEntity<String>(EntityUtils.toString(entity), headers, HttpStatus.ACCEPTED);
-//        } catch (Error e) {
-//            throw e;
-//        }
-    
-    public VerifyToken() {
-        
-    }
+
+    // param str is access token, ánd the code checks the access token against an arbitrarily chosen spotify api call,
+    // for the sole purpose of determining if the given access token is valid or not. Return data 
+    // value is response code of api call
     public static int verifyToken(String str) throws MalformedURLException, IOException {        
         HttpClient client = HttpClients.createDefault();
         HttpGet get = new HttpGet("https://api.spotify.com/v1/me/player");

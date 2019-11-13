@@ -31,13 +31,16 @@ import org.springframework.web.bind.annotation.GetMapping;
 @RestController
 public class Login {
     
+    // returns the code 2xx if access token in mysql database is valid, 4xx if invalid or doesn't exist
     @GetMapping("/token")
     public ResponseEntity tokenExists() throws SQLException, IOException {
+        // allowing cross-origin access from localhost:3000
         HttpHeaders headers = new HttpHeaders();
         headers.set("Access-Control-Allow-Origin", "http://localhost:3000");
         Connection conn = JdbcRepository.getConnection();
         Statement stmt = conn.createStatement();
         
+        // grab the "access token" from the database
         String str = "select * from `token` limit 1";
         ResultSet rs = stmt.executeQuery(str);
         
@@ -51,31 +54,19 @@ public class Login {
     
     @GetMapping("/login")
     public ResponseEntity login() throws MalformedURLException, IOException, InterruptedException, SQLException {
-//        URL obj = new URL("https://www.google.com");
-//        HttpURLConnection con = (HttpURLConnection) obj.openConnection();
-//        con.setRequestMethod("GET");
-//        con.setRequest
+        
+        // setting headers to allow access from electron application from localhost:3000
         HttpHeaders headers = new HttpHeaders();
         headers.set("Access-Control-Allow-Origin", "http://localhost:3000");
-////        URL url = new URL("https://accounts.spotify.com/authorize?client_id=ba2aa172bb954f54be32398e8120381c&response_type=code&scope=user-modify-playback-state&redirect_uri=http://localhost:8080/callback");
-////        HttpURLConnection con = (HttpURLConnection) url.openConnection();
-////        con.setRequestMethod("GET");
-//        HttpGet get = new HttpGet("https://accounts.spotify.com/authorize?client_id=ba2aa172bb954f54be32398e8120381c&response_type=code&scope=user-modify-playback-state&redirect_uri=http://localhost:8080/callback");
-//        HttpClient client = HttpClients.createDefault();
-//        
-//        try {
-//        HttpResponse response = client.execute(get);
-//        HttpEntity entity =  response.getEntity();
-//        return new ResponseEntity<String>(EntityUtils.toString(entity), headers, HttpStatus.ACCEPTED);
-//        } catch (Error e) {
-//            throw e;
-//        }
-//        return new ResponseEntity<>("Hello World updated!", headers, HttpStatus.ACCEPTED);
-//          Thread.sleep(5000);
+        
+        // getting connection to mysql database
         Connection conn = JdbcRepository.getConnection();
         Statement stmt = conn.createStatement();
         String str = "select * from `token` limit 1";
         System.out.println("BEFORE LOOP");
+        
+        // loops to check if valid access token is inside mysql table, if valid then return valid access code (eg. 200),
+        // if invalid token is given then loop breaks and returns invalid access code (eg. 400)a
         while (true) {
             System.out.println("INSIDE LOOP");
         ResultSet rs = stmt.executeQuery(str);
