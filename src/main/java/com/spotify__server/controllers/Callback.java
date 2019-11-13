@@ -25,15 +25,11 @@ import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.util.EntityUtils;
 import org.springframework.boot.configurationprocessor.json.JSONException;
-//import org.springframework.boot.configurationprocessor.json.JSONObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -80,8 +76,14 @@ public class Callback {
         Connection conn = JdbcRepository.getConnection();
         String s = (String) jsonObj.get("access_token");
         Statement stmt = conn.createStatement();
+        
+        ResultSet rset = stmt.executeQuery("select * from `token`"); 
+        if (rset.next()) {
+            stmt.executeUpdate("delete from `token`");
+        }
+        
         String str = "insert into `token` (`access_token`) values ('" + s + "')";
-        Integer rset = stmt.executeUpdate(str);
+        stmt.executeUpdate(str);
         System.out.println("inserted access token inside db!");
         return new ResponseEntity<>("Loading...", HttpStatus.ACCEPTED);
         }
