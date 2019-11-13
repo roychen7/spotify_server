@@ -69,22 +69,22 @@ public class Callback {
           
         HttpEntity entity = response.getEntity();
         String jsonString = getResponseString(entity);
-        System.out.println(jsonString);
+//        System.out.println(jsonString);
         
         JSONParser parser = new JSONParser();
         JSONObject jsonObj = (JSONObject) parser.parse(jsonString);
-        
-        JdbcRepository rep = new JdbcRepository();
+
 //        return rep.getAccessToken();
 //        int res = template.update("INSERT INTO access_token VALUES (?)", jsonObj.get("access_token"));
         Connection conn = JdbcRepository.getConnection();
         if (conn != null) {
                 String s = (String) jsonObj.get("access_token");
                 Statement stmt = conn.createStatement();
-//                String str = "insert into `token` (`access_token`) values ('" + s + "')";
-                  String str = "insert into `token` (`access_token`) values ('nigeria!')";
+                String str = "insert into `token` (`access_token`) values ('" + s + "')";
+//                  String str = "insert into `token` (`access_token`) values ("'" + s + "'"")";
                 Integer rset = stmt.executeUpdate(str);
-                return new ResponseEntity<>("got past rset!", HttpStatus.ACCEPTED);
+                System.out.println("inserted access token inside db!");
+                return new ResponseEntity<>("Loading...", HttpStatus.ACCEPTED);
                 
 //        return new ResponseEntity<>(s, HttpStatus.ACCEPTED); 
         } else {

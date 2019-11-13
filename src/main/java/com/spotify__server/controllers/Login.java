@@ -19,6 +19,7 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import modules.VerifyToken;
 import org.apache.http.HttpResponse;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,16 +35,18 @@ public class Login {
     public ResponseEntity tokenExists() throws SQLException, IOException {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Access-Control-Allow-Origin", "http://localhost:3000");
-        
-        System.out.println("Inside token endpoint");
         Connection conn = JdbcRepository.getConnection();
         Statement stmt = conn.createStatement();
         
-        ResultSet rs = stmt.executeQuery("select * from `token`");
-        rs.next();
-        String s = rs.getString(1);
-        System.out.println(s);
-        return new ResponseEntity(s, headers, HttpStatus.ACCEPTED);     
+        String str = "select * from `token` limit 1";
+        ResultSet rs = stmt.executeQuery(str);
+        
+        if (rs.next()) {
+            int code = VerifyToken.verifyToken(rs.getString(1));
+            return new ResponseEntity<>(code, headers, HttpStatus.ACCEPTED);
+        } else {
+            return new ResponseEntity<>("400", headers, HttpStatus.ACCEPTED);
+        }
     }   
     
     @GetMapping("/login")
@@ -53,7 +56,7 @@ public class Login {
 //        con.setRequestMethod("GET");
 //        con.setRequest
         HttpHeaders headers = new HttpHeaders();
-        headers.set("Access-Control-Allow-Origin", "http://localhost:1234");
+        headers.set("Access-Control-Allow-Origin", "http://localhost:3000");
 ////        URL url = new URL("https://accounts.spotify.com/authorize?client_id=ba2aa172bb954f54be32398e8120381c&response_type=code&scope=user-modify-playback-state&redirect_uri=http://localhost:8080/callback");
 ////        HttpURLConnection con = (HttpURLConnection) url.openConnection();
 ////        con.setRequestMethod("GET");
@@ -69,8 +72,22 @@ public class Login {
 //        }
 //        return new ResponseEntity<>("Hello World updated!", headers, HttpStatus.ACCEPTED);
 //          Thread.sleep(5000);
-            
-            
-            return new ResponseEntity<>("hi", HttpStatus.ACCEPTED);
+        Connection conn = JdbcRepository.getConnection();
+        Statement stmt = conn.createStatement();
+        String str = "select * from `token` limit 1";
+        System.out.println("BEFORE LOOP");
+        while (true) {
+            System.out.println("INSIDE LOOP");
+        ResultSet rs = stmt.executeQuery(str);
+        String s = "";
+        if (rs.next()) {
+            System.out.println("Inside IF STATEMENT INSIDE LOOP ");
+            s = rs.getString(1);
+            System.out.println(s);
+            int resp = VerifyToken.verifyToken(s);
+            return new ResponseEntity<>(resp, headers, HttpStatus.ACCEPTED);
+        }
+        Thread.sleep(500);
+        }
     }
 }
