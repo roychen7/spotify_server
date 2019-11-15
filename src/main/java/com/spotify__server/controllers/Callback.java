@@ -5,7 +5,9 @@
  */
 package com.spotify__server.controllers;
 
+import com.spotify__server.modules.HelperClass;
 import com.spotify__server.repositories.JdbcRepository;
+import com.spotify__server.threads.RefreshThread;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -13,7 +15,6 @@ import java.net.MalformedURLException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import net.minidev.json.parser.JSONParser;
@@ -34,6 +35,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import java.sql.Statement;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  *
@@ -45,6 +49,8 @@ public class Callback {
 
     @RequestMapping("/callback") 
     public ResponseEntity callback(@RequestParam String code) throws MalformedURLException, IOException, JSONException, ParseException, SQLException {
+        System.out.println("callback inside!");
+        
         // initializing client and httpPost (post request is to get access token from given access code in req URL)
         HttpClient client = HttpClients.createDefault();
         HttpPost httpPost = new HttpPost("https://accounts.spotify.com/api/token/");
@@ -66,44 +72,34 @@ public class Callback {
         
         // get string format of response
         HttpEntity entity = response.getEntity();
-        String jsonString = getResponseString(entity);
+        String jsonString = HelperClass.getResponseString(entity);
         
         // parse response string into json object
         JSONParser parser = new JSONParser();
         JSONObject jsonObj = (JSONObject) parser.parse(jsonString);
+        
+        System.out.println("before connection");
 
         // insert the access token from post response into database, return a "loading" screen
         Connection conn = JdbcRepository.getConnection();
-        String s = (String) jsonObj.get("access_token");
+        String access_token = (String) jsonObj.get("access_token");
+        String refresh_token = (String) jsonObj.get("refresh_token");
         Statement stmt = conn.createStatement();
         
-        ResultSet rset = stmt.executeQuery("select * from `token`"); 
+        ResultSet rset = stmt.executeQuery("select `access_token` from `token`"); 
+        
         if (rset.next()) {
             stmt.executeUpdate("delete from `token`");
         }
         
-        String str = "insert into `token` (`access_token`) values ('" + s + "')";
+        System.out.println("after rs.next()");
+        String str = "insert into `token` (`access_token`, `refresh_token`) values ('" +access_token+ "','" +refresh_token+ "')";
         stmt.executeUpdate(str);
+        
+        ScheduledExecutorService exec = Executors.newScheduledThreadPool(1);
+        exec.scheduleAtFixedRate(new RefreshThread(), 0, 60, TimeUnit.MINUTES);
+        
         System.out.println("inserted access token inside db!");
         return new ResponseEntity<>("Loading...", HttpStatus.ACCEPTED);
         }
-    
-    // code taken from https://stackoverflow.com/questions/3324717/sending-http-post-request-in-java
-    // This function turns an httpentity into string format
-    public static String getResponseString(HttpEntity entity) {
-    StringBuilder builder = new StringBuilder();
-    if (entity != null) {
-        try (BufferedReader in = new BufferedReader(new InputStreamReader(entity.getContent()))) {
-            String inputLine;
-            while ((inputLine = in.readLine()) != null) {
-                builder.append(inputLine);
-            }
-        } catch (IOException e) {
-            return null;
-        }
-
-    }
-    return builder.toString();
-    }
 }
-

@@ -19,7 +19,11 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import modules.VerifyToken;
+import com.spotify__server.modules.HelperClass;
+import com.spotify__server.threads.RefreshThread;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import org.apache.http.HttpResponse;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,27 +35,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 @RestController
 public class Login {
     
-    // returns the code 2xx if access token in mysql database is valid, 4xx if invalid or doesn't exist
-    @GetMapping("/token")
-    public ResponseEntity tokenExists() throws SQLException, IOException {
-        // allowing cross-origin access from localhost:3000
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Access-Control-Allow-Origin", "http://localhost:3000");
-        Connection conn = JdbcRepository.getConnection();
-        Statement stmt = conn.createStatement();
-        
-        // grab the "access token" from the database
-        String str = "select * from `token` limit 1";
-        ResultSet rs = stmt.executeQuery(str);
-        
-        if (rs.next()) {
-            int code = VerifyToken.verifyToken(rs.getString(1));
-            return new ResponseEntity<>(code, headers, HttpStatus.ACCEPTED);
-        } else {
-            return new ResponseEntity<>("400", headers, HttpStatus.ACCEPTED);
-        }
-    }   
-    
     @GetMapping("/login")
     public ResponseEntity login() throws MalformedURLException, IOException, InterruptedException, SQLException {
         
@@ -62,21 +45,24 @@ public class Login {
         // getting connection to mysql database
         Connection conn = JdbcRepository.getConnection();
         Statement stmt = conn.createStatement();
-        String str = "select * from `token` limit 1";
-        System.out.println("BEFORE LOOP");
+        String str = "select `access_token` from `token`";
+//        System.out.println("BEFORE LOOP");
         
         // loops to check if valid access token is inside mysql table, if valid then return valid access code (eg. 200),
         // if invalid token is given then loop breaks and returns invalid access code (eg. 400)a
         while (true) {
-            System.out.println("INSIDE LOOP");
+//            System.out.println("INSIDE LOOP");
         ResultSet rs = stmt.executeQuery(str);
         String s = "";
         if (rs.next()) {
-            System.out.println("Inside IF STATEMENT INSIDE LOOP ");
+//            System.out.println("Inside IF STATEMENT INSIDE LOOP ");
             s = rs.getString(1);
-            System.out.println(s);
-            int resp = VerifyToken.verifyToken(s);
+//            System.out.println(s);
+            int resp = HelperClass.verifyToken(s);
+            String temp = Integer.toString(resp);
+            if (temp.charAt(0) == "2".charAt(0)) {
             return new ResponseEntity<>(resp, headers, HttpStatus.ACCEPTED);
+        }
         }
         Thread.sleep(500);
         }
