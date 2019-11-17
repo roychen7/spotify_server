@@ -74,16 +74,16 @@ public class Token {
         return new ResponseEntity<>(code, headers, HttpStatus.ACCEPTED);
     }
     
-    @GetMapping("/test")
-    public void test() throws IOException {
-        HttpGet get = new HttpGet("http://localhost:8080/token");
-        HttpClient client = HttpClients.createDefault();
-        
-        HttpResponse response = client.execute(get);
-        
-        System.out.println(EntityUtils.toString(response.getEntity()));
-    }
-    
+//    @GetMapping("/test")
+//    public void test() throws IOException {
+//        HttpGet get = new HttpGet("http://localhost:8080/token");
+//        HttpClient client = HttpClients.createDefault();
+//        
+//        HttpResponse response = client.execute(get);
+//        
+//        System.out.println(EntityUtils.toString(response.getEntity()));
+//    }
+//    
     
     // tests whether token is valid or not by making a spotify api call
     @GetMapping("/valid_token")

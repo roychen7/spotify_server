@@ -59,6 +59,14 @@ public class Player {
         return new ResponseEntity<>(response, headers, HttpStatus.ACCEPTED);
     }
     
+    @GetMapping("/pause_upd")
+    public ResponseEntity updatePauseSingleton() throws IOException, ParseException {
+        GlobalSingleton.getInstance().updatePlay(false);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Access-Control-Allow-Origin", "http://localhost:3000");
+        return new ResponseEntity<>("", headers, HttpStatus.ACCEPTED);
+    }
+    
     // mapping for playing current song
     @GetMapping("/play")
     public ResponseEntity playSong() throws SQLException, IOException, ParseException {
@@ -83,5 +91,13 @@ public class Player {
         
         GlobalSingleton.getInstance().updatePlay(true);
         return new ResponseEntity<>(response, headers, HttpStatus.ACCEPTED);
+    }
+    
+    @GetMapping("/play_upd")
+    public ResponseEntity updatePlaySingleton() throws IOException, ParseException {
+        GlobalSingleton.getInstance().updatePlay(true);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Access-Control-Allow-Origin", "http://localhost:3000");
+        return new ResponseEntity<>("", headers, HttpStatus.ACCEPTED);
     }
 }

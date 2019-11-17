@@ -47,7 +47,7 @@ public class MainThread implements Runnable {
         get_pause = new HttpGet("http://localhost:8080/pause");
         get_play = new HttpGet("http://localhost:8080/play");
     }
-    
+     
     public void run() {
         System.out.println("running!");
         Timer t = new Timer();

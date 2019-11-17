@@ -37,7 +37,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class Login {
     
     
-    // returns code 200 once a valid token is stored in the database
+    // returns code 200 once a valid token is stored in the database. will be in endless loop until this happens
     @GetMapping("/login")
     public ResponseEntity login() throws MalformedURLException, IOException, InterruptedException, SQLException {
         
