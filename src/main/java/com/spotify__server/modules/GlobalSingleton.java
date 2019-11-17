@@ -27,9 +27,17 @@ import org.apache.http.util.EntityUtils;
 public class GlobalSingleton {
     private static GlobalSingleton instance;
     private String access_token;
+    
+    // 
     private Executor single_executor;
+    
+    // bool returning true if user has a currently playing track, false otherwise
     private boolean play;
+    
+    // bool for determining if user can currently play (might be disallowed if user reached time limit)
     private boolean can_play;
+    
+    // bool for determining if program is supposed to auto-pause. Used in mainthread
     private boolean supposed_to_pause;
     
     

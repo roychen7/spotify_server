@@ -88,7 +88,7 @@ public class Token {
     // tests whether token is valid or not by making a spotify api call
     @GetMapping("/valid_token")
     public ResponseEntity tokenExists() throws SQLException, IOException, ParseException {
-//        System.out.println("controllers:token:/valid_token");
+        System.out.println("controllers:token:/valid_token");
         
         // allowing cross-origin access from localhost:3000
         HttpHeaders headers = new HttpHeaders();
@@ -107,11 +107,6 @@ public class Token {
         } 
         
         if (Integer.toString(code).charAt(0) == "2".charAt(0)) {
-//            ScheduledExecutorService exec = Executors.newScheduledThreadPool(1);
-//            exec.scheduleAtFixedRate(new RefreshThread(), 0, 60, TimeUnit.MINUTES);
-//            
-//            Thread t1 = new Thread(new CounterThread());
-//            t1.start();
             
             Executor executor = GlobalSingleton.getInstance().getExecutor();
             executor.execute(new MainThread());
