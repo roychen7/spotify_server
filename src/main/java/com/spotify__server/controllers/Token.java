@@ -5,9 +5,10 @@
  */
 package com.spotify__server.controllers;
 
+import com.spotify__server.modules.GlobalSingleton;
 import com.spotify__server.modules.HelperClass;
 import com.spotify__server.repositories.JdbcRepository;
-import com.spotify__server.threads.RefreshThread;
+import com.spotify__server.threads.MainThread;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -15,6 +16,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -26,13 +28,16 @@ import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -40,12 +45,50 @@ import org.springframework.web.bind.annotation.RestController;
  * @author roychen
  */
 
+// this class is meant for dealing with access and refresh tokens
 @RestController
 public class Token {
     
+    
+    // returns token in database
     @GetMapping("/token")
-    public ResponseEntity tokenExists() throws SQLException, IOException {
-        System.out.println("controllers:token:/token");
+    public ResponseEntity getToken() throws SQLException, IOException {
+        System.out.println("controllers:token/token");
+        
+        // allowing cross-origin access from localhost:3000
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Access-Control-Allow-Origin", "http://localhost:3000");
+        Connection conn = JdbcRepository.getConnection();
+        Statement stmt = conn.createStatement();
+        
+        // grab the "access token" from the database
+        String str = "select `access_token` from `token`";
+        ResultSet rs = stmt.executeQuery(str);
+        
+        String code = "";
+        if (rs.next()) {
+            code = rs.getString(1);
+        } 
+       
+//        return code;
+        return new ResponseEntity<>(code, headers, HttpStatus.ACCEPTED);
+    }
+    
+    @GetMapping("/test")
+    public void test() throws IOException {
+        HttpGet get = new HttpGet("http://localhost:8080/token");
+        HttpClient client = HttpClients.createDefault();
+        
+        HttpResponse response = client.execute(get);
+        
+        System.out.println(EntityUtils.toString(response.getEntity()));
+    }
+    
+    
+    // tests whether token is valid or not by making a spotify api call
+    @GetMapping("/valid_token")
+    public ResponseEntity tokenExists() throws SQLException, IOException, ParseException {
+//        System.out.println("controllers:token:/valid_token");
         
         // allowing cross-origin access from localhost:3000
         HttpHeaders headers = new HttpHeaders();
@@ -64,13 +107,21 @@ public class Token {
         } 
         
         if (Integer.toString(code).charAt(0) == "2".charAt(0)) {
-            ScheduledExecutorService exec = Executors.newScheduledThreadPool(1);
-            exec.scheduleAtFixedRate(new RefreshThread(), 0, 60, TimeUnit.MINUTES);
+//            ScheduledExecutorService exec = Executors.newScheduledThreadPool(1);
+//            exec.scheduleAtFixedRate(new RefreshThread(), 0, 60, TimeUnit.MINUTES);
+//            
+//            Thread t1 = new Thread(new CounterThread());
+//            t1.start();
+            
+            Executor executor = GlobalSingleton.getInstance().getExecutor();
+            executor.execute(new MainThread());
         }
         
         return new ResponseEntity<>(code, headers, HttpStatus.ACCEPTED);
     }  
     
+    
+    // use refresh token to obtain new access token and store it in the db
     @GetMapping("/refresh")
     public ResponseEntity getRefreshToken() throws SQLException, IOException, ParseException {
         
@@ -107,6 +158,7 @@ public class Token {
         
         String access_token = (String) jsonObj.get("access_token");
         stmt.executeUpdate("update `token` set `access_token`='" +access_token+ "'");
+        GlobalSingleton.getInstance().updateToken(access_token);
         
         System.out.println("updated token!");
         return new ResponseEntity<>("", HttpStatus.ACCEPTED);

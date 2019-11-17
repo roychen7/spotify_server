@@ -20,7 +20,6 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import com.spotify__server.modules.HelperClass;
-import com.spotify__server.threads.RefreshThread;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -32,9 +31,13 @@ import org.springframework.web.bind.annotation.GetMapping;
  *
  * @author roychen
  */
+
+// this class deals with the login endpoint
 @RestController
 public class Login {
     
+    
+    // returns code 200 once a valid token is stored in the database
     @GetMapping("/login")
     public ResponseEntity login() throws MalformedURLException, IOException, InterruptedException, SQLException {
         

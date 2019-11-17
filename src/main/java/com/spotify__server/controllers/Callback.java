@@ -5,9 +5,10 @@
  */
 package com.spotify__server.controllers;
 
+import com.spotify__server.modules.GlobalSingleton;
 import com.spotify__server.modules.HelperClass;
 import com.spotify__server.repositories.JdbcRepository;
-import com.spotify__server.threads.RefreshThread;
+import com.spotify__server.threads.MainThread;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -35,6 +36,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import java.sql.Statement;
+import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -44,9 +46,13 @@ import java.util.concurrent.TimeUnit;
  * @author roychen
  */
 // 
+
+// this is the class for dealing with the redirect uri while trying to authorize the spotify api
 @RestController
 public class Callback {
 
+    
+    // uses authorization code to request for access token, and then stores it in db once retrieved
     @RequestMapping("/callback") 
     public ResponseEntity callback(@RequestParam String code) throws MalformedURLException, IOException, JSONException, ParseException, SQLException {
         System.out.println("callback inside!");
@@ -95,11 +101,14 @@ public class Callback {
         System.out.println("after rs.next()");
         String str = "insert into `token` (`access_token`, `refresh_token`) values ('" +access_token+ "','" +refresh_token+ "')";
         stmt.executeUpdate(str);
+        GlobalSingleton.getInstance().updateToken(access_token);
         
-        ScheduledExecutorService exec = Executors.newScheduledThreadPool(1);
-        exec.scheduleAtFixedRate(new RefreshThread(), 0, 60, TimeUnit.MINUTES);
+//        ScheduledExecutorService exec = Executors.newScheduledThreadPool(1);
+//        exec.scheduleAtFixedRate(new RefreshThread(), 0, 60, TimeUnit.MINUTES);
+
+        Executor executor = GlobalSingleton.getInstance().getExecutor();
+        executor.execute(new MainThread());
         
-        System.out.println("inserted access token inside db!");
         return new ResponseEntity<>("Loading...", HttpStatus.ACCEPTED);
         }
 }

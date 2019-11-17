@@ -5,12 +5,14 @@
  */
 package com.spotify__server.controllers;
 
+import com.spotify__server.modules.GlobalSingleton;
 import com.spotify__server.repositories.JdbcRepository;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import net.minidev.json.parser.ParseException;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPut;
@@ -26,12 +28,14 @@ import org.springframework.web.bind.annotation.RestController;
  *
  * @author roychen
  */
+
+// this class is meant for dealing with functionalities regarding playing/pausing/skipping songs
 @RestController
 public class Player {
     
     // mapping for pausing current song
     @GetMapping("/pause")
-    public ResponseEntity pauseSong() throws SQLException, IOException {
+    public ResponseEntity pauseSong() throws SQLException, IOException, ParseException {
         HttpClient client = HttpClients.createDefault();
         HttpPut put = new HttpPut("https://api.spotify.com/v1/me/player/pause");
         
@@ -51,12 +55,13 @@ public class Player {
         
         HttpResponse response = client.execute(put);
         
+        GlobalSingleton.getInstance().updatePlay(false);
         return new ResponseEntity<>(response, headers, HttpStatus.ACCEPTED);
     }
     
     // mapping for playing current song
     @GetMapping("/play")
-    public ResponseEntity playSong() throws SQLException, IOException {
+    public ResponseEntity playSong() throws SQLException, IOException, ParseException {
         HttpClient client = HttpClients.createDefault();
         HttpPut put = new HttpPut("https://api.spotify.com/v1/me/player/play");
         
@@ -76,6 +81,7 @@ public class Player {
         
         HttpResponse response = client.execute(put);
         
+        GlobalSingleton.getInstance().updatePlay(true);
         return new ResponseEntity<>(response, headers, HttpStatus.ACCEPTED);
     }
 }

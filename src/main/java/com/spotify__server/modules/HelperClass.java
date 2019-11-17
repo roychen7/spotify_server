@@ -19,6 +19,8 @@ import org.apache.http.impl.client.HttpClients;
  *
  * @author roychen
  */
+
+// a utility class for arbitrary helper functions
 public class HelperClass {
     
     // code taken from https://stackoverflow.com/questions/3324717/sending-http-post-request-in-java
