@@ -21,11 +21,14 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import com.spotify__server.modules.HelperClass;
+import com.spotify__server.modules.ServerListener;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import net.minidev.json.parser.ParseException;
 import org.apache.http.HttpResponse;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 
@@ -36,8 +39,18 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 // this class deals with the login endpoint
 @RestController
+@ComponentScan("com.spotify__server")
 public class Login {
     
+    
+    @Autowired
+    ServerListener server_listener;
+    
+    
+    @GetMapping("/testloginlistener")
+    public void testlol() {
+        System.out.println(server_listener.getConnectCount());
+    }
     
     // returns code 200 once a valid token is stored in the database. will be in endless loop until this happens
     @GetMapping("/login")

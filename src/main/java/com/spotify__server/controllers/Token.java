@@ -7,6 +7,7 @@ package com.spotify__server.controllers;
 
 import com.spotify__server.modules.GlobalSingleton;
 import com.spotify__server.modules.HelperClass;
+import com.spotify__server.modules.ServerListener;
 import com.spotify__server.repositories.JdbcRepository;
 import com.spotify__server.threads.MainThread;
 import java.io.IOException;
@@ -30,6 +31,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -48,6 +50,9 @@ public class Token {
     static String access_token;
     static String refresh_token;
     
+    @Autowired
+    private ServerListener server_listener;
+
     // returns token in database
     @GetMapping("/token")
     public ResponseEntity getToken() throws SQLException, IOException, ParseException {
@@ -110,8 +115,13 @@ public class Token {
             }
             con.close();
             if (Integer.toString(code).charAt(0) == "2".charAt(0)) {
-            Executor executor = GlobalSingleton.getInstance().getExecutor();
-            executor.execute(new MainThread());
+                if (server_listener.getConnected() == 0) {
+                    Executor executor = GlobalSingleton.getInstance().getExecutor();
+                    MainThread t1 = new MainThread();
+                    executor.execute(t1);                   
+                    server_listener.setConnected(1);
+                }
+            System.out.println("SERVER connected: " + server_listener.getConnected());
             }
         
              return new ResponseEntity<>(code, headers, HttpStatus.ACCEPTED);

@@ -39,12 +39,6 @@ public class GlobalSingleton {
     // bool returning true if user has a currently playing track, false otherwise
     private boolean play;
     
-    // bool for determining if user can currently play (eg. might be disallowed if user reached time limit)
-    private boolean can_play;
-    
-    // bool for determining if program is supposed to auto-pause. Used in mainthread
-    private boolean supposed_to_pause;
-    
     
     private GlobalSingleton() {
         try{
@@ -66,8 +60,6 @@ public class GlobalSingleton {
         
         play = (boolean) obj.get("is_playing");
         System.out.println("IS PLAYING IS : " + obj.get("is_playing"));
-        can_play = true;
-        supposed_to_pause = false;
         
         }catch (IOException ex) {
                 System.out.println("ioexception");
@@ -84,14 +76,7 @@ public class GlobalSingleton {
         }
         return instance;
     }
-    
-    public boolean getSupposedToPause() {
-        return supposed_to_pause;
-    }
-    
-    public void updateSupposedToPause(boolean b) {
-        this.supposed_to_pause = b;
-    }
+
     public String getToken() {
         return access_token;
     }
@@ -110,13 +95,5 @@ public class GlobalSingleton {
     
     public void updatePlay(boolean play) {
         this.play = play;
-    }
-    
-    public boolean getCanPlay() {
-        return can_play;
-    }
-    
-    public void setCanPlay(boolean can_play) {
-        this.can_play = can_play;
     }
 }

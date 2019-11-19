@@ -8,6 +8,8 @@ package com.spotify__server.threads;
 import com.spotify__server.modules.GlobalSingleton;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.logging.Level;
@@ -26,11 +28,14 @@ public class MainThread implements Runnable {
     private int play_time;
     private int pause_time;
     private boolean already_paused;
+    private boolean supposed_to_pause;
     private HttpClient client;
     private HttpGet get_pause;
     private HttpGet get_play;
+    private boolean kill_thread;
             
     public MainThread() {
+        kill_thread = false;
         System.out.println("main thread created!");
         play_time = pause_time = 0;
         already_paused = false;
@@ -45,9 +50,6 @@ public class MainThread implements Runnable {
         Timer t = new Timer();
         t.schedule(new Execute(), 0, 1000);
         t.schedule(new Refresh(), 0, 3600000);
-        while (true) {
-            
-        }
     }
     
     class Execute extends TimerTask {
@@ -64,7 +66,7 @@ public class MainThread implements Runnable {
                                         
                     if (play_time == 3600) {
                         client.execute(get_pause);
-                        GlobalSingleton.getInstance().updateSupposedToPause(true);
+                        supposed_to_pause = true;
                         System.out.println("executed pause");
                         return;
                     }
@@ -74,12 +76,12 @@ public class MainThread implements Runnable {
                     if (!already_paused) {
                         already_paused = true;
                     } else {
-                        if (GlobalSingleton.getInstance().getSupposedToPause() == true && pause_time == 600){
+                        if (supposed_to_pause == true && pause_time == 600){
                                   play_time = 0;
                                   client.execute(get_play);
                                   
                                   System.out.println("executed play");
-                                  GlobalSingleton.getInstance().updateSupposedToPause(false);
+                                  supposed_to_pause = false;
                                   return;
                           } else if (pause_time >= 450) {
                               play_time = 0;

@@ -7,6 +7,7 @@ package com.spotify__server.controllers;
 
 import com.spotify__server.modules.GlobalSingleton;
 import com.spotify__server.modules.HelperClass;
+import com.spotify__server.modules.ServerListener;
 import com.spotify__server.repositories.JdbcRepository;
 import com.spotify__server.threads.MainThread;
 import java.io.BufferedReader;
@@ -41,6 +42,8 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.ComponentScan;
 
 /**
  *
@@ -50,6 +53,7 @@ import java.util.concurrent.TimeUnit;
 
 // this is the class for dealing with the redirect uri while trying to authorize the spotify api
 @RestController
+@ComponentScan("com.spotify__server")
 public class Callback {
     
     // uses authorization code to request for access token, and then stores it in db once retrieved
@@ -89,6 +93,7 @@ public class Callback {
         // insert the access token from post response into database, return a "loading" screen
         String access_token = (String) jsonObj.get("access_token");
         String refresh_token = (String) jsonObj.get("refresh_token");
+        
         try (Connection con = JdbcRepository.getConnection()) {
         Statement stmt = con.createStatement();
         
@@ -101,10 +106,6 @@ public class Callback {
         String str = "insert into `token` (`access_token`, `refresh_token`) values ('" +access_token+ "','" +refresh_token+ "')";
         stmt.executeUpdate(str);
         con.close();
-        GlobalSingleton.getInstance().updateToken(access_token);
-        
-//        ScheduledExecutorService exec = Executors.newScheduledThreadPool(1);
-//        exec.scheduleAtFixedRate(new RefreshThread(), 0, 60, TimeUnit.MINUTES);
         
         return new ResponseEntity<>("Loading...", HttpStatus.ACCEPTED);
         } catch (Error e) {
