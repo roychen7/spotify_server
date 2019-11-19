@@ -17,9 +17,6 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
@@ -48,18 +45,20 @@ import org.springframework.web.bind.annotation.RestController;
 // this class is meant for dealing with access and refresh tokens
 @RestController
 public class Token {
-    
+    static String access_token;
+    static String refresh_token;
     
     // returns token in database
     @GetMapping("/token")
-    public ResponseEntity getToken() throws SQLException, IOException {
+    public ResponseEntity getToken() throws SQLException, IOException, ParseException {
         System.out.println("controllers:token/token");
         
         // allowing cross-origin access from localhost:3000
         HttpHeaders headers = new HttpHeaders();
         headers.set("Access-Control-Allow-Origin", "http://localhost:3000");
-        Connection conn = JdbcRepository.getConnection();
-        Statement stmt = conn.createStatement();
+        
+        try (Connection con = JdbcRepository.getConnection()) {
+        Statement stmt = con.createStatement();
         
         // grab the "access token" from the database
         String str = "select `access_token` from `token`";
@@ -68,22 +67,27 @@ public class Token {
         String code = "";
         if (rs.next()) {
             code = rs.getString(1);
-        } 
-       
+        }
+        
+        con.close();
 //        return code;
         return new ResponseEntity<>(code, headers, HttpStatus.ACCEPTED);
+        }
     }
     
-//    @GetMapping("/test")
-//    public void test() throws IOException {
-//        HttpGet get = new HttpGet("http://localhost:8080/token");
-//        HttpClient client = HttpClients.createDefault();
-//        
-//        HttpResponse response = client.execute(get);
-//        
-//        System.out.println(EntityUtils.toString(response.getEntity()));
-//    }
-//    
+    @GetMapping("/test")
+    public void test() throws IOException, SQLException {
+        System.out.println("connecting from Token::/test");
+        Connection conn = JdbcRepository.getConnection();
+        
+        if (conn != null) {
+            System.out.println("Not null!");
+        } else {
+            System.out.println("Null!");
+        }
+        conn.close();
+    }
+    
     
     // tests whether token is valid or not by making a spotify api call
     @GetMapping("/valid_token")
@@ -93,26 +97,25 @@ public class Token {
         // allowing cross-origin access from localhost:3000
         HttpHeaders headers = new HttpHeaders();
         headers.set("Access-Control-Allow-Origin", "http://localhost:3000");
-        Connection conn = JdbcRepository.getConnection();
-        Statement stmt = conn.createStatement();
-        
-        // grab the "access token" from the database
-        String str = "select `access_token` from `token`";
-        ResultSet rs = stmt.executeQuery(str);
-        
-        // set code to 2xx if access token is valid, 4xx if invalid
-        int code = 400;
-        if (rs.next()) {
-            code = HelperClass.verifyToken(rs.getString(1));
-        } 
-        
-        if (Integer.toString(code).charAt(0) == "2".charAt(0)) {
+        try (Connection con = JdbcRepository.getConnection()) {
+            Statement stmt = con.createStatement();
+            // grab the "access token" from the database
+            String str = "select `access_token` from `token`";
+            ResultSet rs = stmt.executeQuery(str);
             
+//          set code to 2xx if access token is valid, default of 4xx (invalid)
+            int code = 400;
+            if (rs.next()) {
+                code = HelperClass.verifyToken(rs.getString(1));
+            }
+            con.close();
+            if (Integer.toString(code).charAt(0) == "2".charAt(0)) {
             Executor executor = GlobalSingleton.getInstance().getExecutor();
             executor.execute(new MainThread());
-        }
+            }
         
-        return new ResponseEntity<>(code, headers, HttpStatus.ACCEPTED);
+             return new ResponseEntity<>(code, headers, HttpStatus.ACCEPTED);
+        }
     }  
     
     
@@ -126,9 +129,9 @@ public class Token {
         HttpPost post = new HttpPost("https://accounts.spotify.com/api/token");
         HttpClient client = HttpClients.createDefault();
         
-        Connection conn = JdbcRepository.getConnection();
-        Statement stmt = conn.createStatement();
-        
+        System.out.println("connecting from Token::/refresh");
+        try (Connection con = JdbcRepository.getConnection()) {
+        Statement stmt = con.createStatement();
         ResultSet rs = stmt.executeQuery("select `refresh_token` from `token`");
         String refresh_token = "";
         if (rs.next()) {
@@ -153,9 +156,13 @@ public class Token {
         
         String access_token = (String) jsonObj.get("access_token");
         stmt.executeUpdate("update `token` set `access_token`='" +access_token+ "'");
+        con.close();
         GlobalSingleton.getInstance().updateToken(access_token);
         
         System.out.println("updated token!");
         return new ResponseEntity<>("", HttpStatus.ACCEPTED);
+    } catch (Error e) {
+        return new ResponseEntity<>("An Error was encountered during connection to db", HttpStatus.BAD_REQUEST);
+    }
     }
 }

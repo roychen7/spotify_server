@@ -12,6 +12,7 @@ import com.spotify__server.threads.MainThread;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -50,11 +51,10 @@ import java.util.concurrent.TimeUnit;
 // this is the class for dealing with the redirect uri while trying to authorize the spotify api
 @RestController
 public class Callback {
-
     
     // uses authorization code to request for access token, and then stores it in db once retrieved
     @RequestMapping("/callback") 
-    public ResponseEntity callback(@RequestParam String code) throws MalformedURLException, IOException, JSONException, ParseException, SQLException {
+    public ResponseEntity callback(@RequestParam String code) throws MalformedURLException, JSONException, UnsupportedEncodingException, IOException, ParseException, SQLException {
         System.out.println("callback inside!");
         
         // initializing client and httpPost (post request is to get access token from given access code in req URL)
@@ -87,13 +87,12 @@ public class Callback {
         System.out.println("before connection");
 
         // insert the access token from post response into database, return a "loading" screen
-        Connection conn = JdbcRepository.getConnection();
         String access_token = (String) jsonObj.get("access_token");
         String refresh_token = (String) jsonObj.get("refresh_token");
-        Statement stmt = conn.createStatement();
+        try (Connection con = JdbcRepository.getConnection()) {
+        Statement stmt = con.createStatement();
         
         ResultSet rset = stmt.executeQuery("select `access_token` from `token`"); 
-        
         if (rset.next()) {
             stmt.executeUpdate("delete from `token`");
         }
@@ -101,14 +100,15 @@ public class Callback {
         System.out.println("after rs.next()");
         String str = "insert into `token` (`access_token`, `refresh_token`) values ('" +access_token+ "','" +refresh_token+ "')";
         stmt.executeUpdate(str);
+        con.close();
         GlobalSingleton.getInstance().updateToken(access_token);
         
 //        ScheduledExecutorService exec = Executors.newScheduledThreadPool(1);
 //        exec.scheduleAtFixedRate(new RefreshThread(), 0, 60, TimeUnit.MINUTES);
-
-        Executor executor = GlobalSingleton.getInstance().getExecutor();
-        executor.execute(new MainThread());
         
         return new ResponseEntity<>("Loading...", HttpStatus.ACCEPTED);
-        }
+        } catch (Error e) {
+        return new ResponseEntity<>("An Error was encountered during connection to db", HttpStatus.BAD_REQUEST);
+    }
+    }
 }

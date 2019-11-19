@@ -39,14 +39,15 @@ public class Player {
         HttpClient client = HttpClients.createDefault();
         HttpPut put = new HttpPut("https://api.spotify.com/v1/me/player/pause");
         
-        Connection conn = JdbcRepository.getConnection();
-        Statement stmt = conn.createStatement();
+        try (Connection con = JdbcRepository.getConnection()) {
+        Statement stmt = con.createStatement();
         ResultSet rs = stmt.executeQuery("select `access_token` from `token`");
         String s = "";
         
         if (rs.next()) {
             s = rs.getString(1);
         }
+        con.close();
         
         put.addHeader("Authorization", "Bearer " + s);
         
@@ -57,10 +58,13 @@ public class Player {
         
         GlobalSingleton.getInstance().updatePlay(false);
         return new ResponseEntity<>(response, headers, HttpStatus.ACCEPTED);
+     } catch (Error e) {
+        return new ResponseEntity<>("An Error was encountered during connection to db", HttpStatus.BAD_REQUEST);
+    }
     }
     
     @GetMapping("/pause_upd")
-    public ResponseEntity updatePauseSingleton() throws IOException, ParseException {
+    public ResponseEntity updatePauseSingleton() throws IOException, ParseException, SQLException {
         GlobalSingleton.getInstance().updatePlay(false);
         HttpHeaders headers = new HttpHeaders();
         headers.set("Access-Control-Allow-Origin", "http://localhost:3000");
@@ -73,15 +77,17 @@ public class Player {
         HttpClient client = HttpClients.createDefault();
         HttpPut put = new HttpPut("https://api.spotify.com/v1/me/player/play");
         
-        Connection conn = JdbcRepository.getConnection();
-        Statement stmt = conn.createStatement();
+        try (Connection con = JdbcRepository.getConnection()) {
+        Statement stmt = con.createStatement();
         ResultSet rs = stmt.executeQuery("select `access_token` from `token`");
+        
         String s = "";
         
         if (rs.next()) {
             s = rs.getString(1);
         }
         
+        con.close();
         put.addHeader("Authorization", "Bearer " + s);
         
         HttpHeaders headers = new HttpHeaders();
@@ -91,10 +97,13 @@ public class Player {
         
         GlobalSingleton.getInstance().updatePlay(true);
         return new ResponseEntity<>(response, headers, HttpStatus.ACCEPTED);
+        } catch (Error e) {
+        return new ResponseEntity<>("An Error was encountered during connection to db", HttpStatus.BAD_REQUEST);
+    }
     }
     
     @GetMapping("/play_upd")
-    public ResponseEntity updatePlaySingleton() throws IOException, ParseException {
+    public ResponseEntity updatePlaySingleton() throws IOException, ParseException, SQLException {
         GlobalSingleton.getInstance().updatePlay(true);
         HttpHeaders headers = new HttpHeaders();
         headers.set("Access-Control-Allow-Origin", "http://localhost:3000");

@@ -5,25 +5,17 @@
  */
 package com.spotify__server.threads;
 
-import com.spotify__server.modules.HelperClass;
 import com.spotify__server.modules.GlobalSingleton;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.minidev.json.JSONObject;
-import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
-//import net.minidev.json.JSONObject;
-//import net.minidev.json.parser.JSONParser;
-//import net.minidev.json.parser.ParseException;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
 
 /**
  *
@@ -53,7 +45,9 @@ public class MainThread implements Runnable {
         Timer t = new Timer();
         t.schedule(new Execute(), 0, 1000);
         t.schedule(new Refresh(), 0, 3600000);
-        System.out.println("executed both!");
+        while (true) {
+            
+        }
     }
     
     class Execute extends TimerTask {
@@ -83,6 +77,7 @@ public class MainThread implements Runnable {
                         if (GlobalSingleton.getInstance().getSupposedToPause() == true && pause_time == 600){
                                   play_time = 0;
                                   client.execute(get_play);
+                                  
                                   System.out.println("executed play");
                                   GlobalSingleton.getInstance().updateSupposedToPause(false);
                                   return;
@@ -95,9 +90,6 @@ public class MainThread implements Runnable {
                 }
             } catch (IOException ex) {
                 System.out.println("ioexception");
-                Logger.getLogger(MainThread.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (ParseException ex) {
-                System.out.println("parseexception");
                 Logger.getLogger(MainThread.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
@@ -112,7 +104,7 @@ public class MainThread implements Runnable {
         try {
             client.execute(get);
         } catch (IOException ex) {
-//            Logger.getLogger(RefreshThread.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(MainThread.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     }   

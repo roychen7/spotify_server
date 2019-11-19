@@ -5,6 +5,7 @@
  */
 package com.spotify__server.controllers;
 
+import com.spotify__server.modules.GlobalSingleton;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.sql.Connection;
@@ -23,6 +24,7 @@ import com.spotify__server.modules.HelperClass;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import net.minidev.json.parser.ParseException;
 import org.apache.http.HttpResponse;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -46,8 +48,8 @@ public class Login {
         headers.set("Access-Control-Allow-Origin", "http://localhost:3000");
         
         // getting connection to mysql database
-        Connection conn = JdbcRepository.getConnection();
-        Statement stmt = conn.createStatement();
+        try (Connection con = JdbcRepository.getConnection()) {
+        Statement stmt = con.createStatement();
         String str = "select `access_token` from `token`";
 //        System.out.println("BEFORE LOOP");
         
@@ -64,10 +66,14 @@ public class Login {
             int resp = HelperClass.verifyToken(s);
             String temp = Integer.toString(resp);
             if (temp.charAt(0) == "2".charAt(0)) {
-            return new ResponseEntity<>(resp, headers, HttpStatus.ACCEPTED);
+                con.close();
+                return new ResponseEntity<>(resp, headers, HttpStatus.ACCEPTED);
         }
         }
         Thread.sleep(500);
         }
+    } catch (Error e) {
+        return new ResponseEntity<>("An Error was encountered during connection to db", HttpStatus.BAD_REQUEST);
+    }
     }
 }

@@ -5,13 +5,17 @@
  */
 package com.spotify__server.modules;
 
+import com.spotify__server.repositories.JdbcRepository;
+import com.spotify__server.threads.MainThread;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
-import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
@@ -26,22 +30,24 @@ import org.apache.http.util.EntityUtils;
 // Singleton for storing data related to database, and arbitrary elements such as the executor 
 public class GlobalSingleton {
     private static GlobalSingleton instance;
+                    
     private String access_token;
-    
-    // 
+       
+    // singular thread executor
     private Executor single_executor;
     
     // bool returning true if user has a currently playing track, false otherwise
     private boolean play;
     
-    // bool for determining if user can currently play (might be disallowed if user reached time limit)
+    // bool for determining if user can currently play (eg. might be disallowed if user reached time limit)
     private boolean can_play;
     
     // bool for determining if program is supposed to auto-pause. Used in mainthread
     private boolean supposed_to_pause;
     
     
-    private GlobalSingleton() throws IOException, ParseException {
+    private GlobalSingleton() {
+        try{
         HttpGet get = new HttpGet("http://localhost:8080/token");
         HttpClient client = HttpClients.createDefault();
         
@@ -62,9 +68,17 @@ public class GlobalSingleton {
         System.out.println("IS PLAYING IS : " + obj.get("is_playing"));
         can_play = true;
         supposed_to_pause = false;
+        
+        }catch (IOException ex) {
+                System.out.println("ioexception");
+                Logger.getLogger(MainThread.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (ParseException ex) {
+                System.out.println("parseexception");
+                Logger.getLogger(MainThread.class.getName()).log(Level.SEVERE, null, ex);
+    }
     }
     
-    public static GlobalSingleton getInstance() throws IOException, ParseException {
+    public static GlobalSingleton getInstance() {
         if (instance == null) {
             instance = new GlobalSingleton();
         }
@@ -82,7 +96,7 @@ public class GlobalSingleton {
         return access_token;
     }
     
-    public void updateToken(String token) throws IOException, ParseException {
+    public void updateToken(String token) {
         access_token = token;
     }
     
