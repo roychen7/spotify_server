@@ -62,35 +62,38 @@ public class Token {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Access-Control-Allow-Origin", "http://localhost:3000");
         
-        try (Connection con = JdbcRepository.getConnection()) {
-        Statement stmt = con.createStatement();
-        
-        // grab the "access token" from the database
-        String str = "select `access_token` from `token`";
-        ResultSet rs = stmt.executeQuery(str);
-        
-        String code = "";
-        if (rs.next()) {
-            code = rs.getString(1);
-        }
-        
-        con.close();
+//        try (Connection con = JdbcRepository.getConnection()) {
+//        Statement stmt = con.createStatement();
+//        
+//        // grab the "access token" from the database
+//        String str = "select `access_token` from `token`";
+//        ResultSet rs = stmt.executeQuery(str);
+//        
+//        String code = "";
+//        if (rs.next()) {
+//            code = rs.getString(1);
+//        }
+//        
+//        con.close();
 //        return code;
-        return new ResponseEntity<>(code, headers, HttpStatus.ACCEPTED);
-        }
+
+         String ress = server_listener.getAccessToken();
+         
+        return new ResponseEntity<>(ress, headers, HttpStatus.ACCEPTED);
     }
-    
-    @GetMapping("/test")
-    public void test() throws IOException, SQLException {
-        System.out.println("connecting from Token::/test");
-        Connection conn = JdbcRepository.getConnection();
         
-        if (conn != null) {
-            System.out.println("Not null!");
-        } else {
-            System.out.println("Null!");
-        }
-        conn.close();
+    @GetMapping("/update")
+    public void test() throws IOException, SQLException {
+        System.out.println("connecting from Token::/update");
+        server_listener.updateAccessToken();
+//        Connection conn = JdbcRepository.getConnection();
+//        
+//        if (conn != null) {
+//            System.out.println("Not null!");
+//        } else {
+//            System.out.println("Null!");
+//        }
+//        conn.close();
     }
     
     

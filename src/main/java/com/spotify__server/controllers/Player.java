@@ -6,6 +6,7 @@
 package com.spotify__server.controllers;
 
 import com.spotify__server.modules.GlobalSingleton;
+import com.spotify__server.modules.ServerListener;
 import com.spotify__server.repositories.JdbcRepository;
 import java.io.IOException;
 import java.sql.Connection;
@@ -17,6 +18,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.impl.client.HttpClients;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,6 +34,9 @@ import org.springframework.web.bind.annotation.RestController;
 // this class is meant for dealing with functionalities regarding playing/pausing/skipping songs
 @RestController
 public class Player {
+    
+    @Autowired
+    private ServerListener server_listener;
     
     // mapping for pausing current song
     @GetMapping("/pause")
@@ -56,7 +61,7 @@ public class Player {
         
         HttpResponse response = client.execute(put);
         
-        GlobalSingleton.getInstance().updatePlay(false);
+        server_listener.updateToFalse();
         return new ResponseEntity<>(response, headers, HttpStatus.ACCEPTED);
      } catch (Error e) {
         return new ResponseEntity<>("An Error was encountered during connection to db", HttpStatus.BAD_REQUEST);
@@ -95,7 +100,7 @@ public class Player {
         
         HttpResponse response = client.execute(put);
         
-        GlobalSingleton.getInstance().updatePlay(true);
+        server_listener.updateToTrue();
         return new ResponseEntity<>(response, headers, HttpStatus.ACCEPTED);
         } catch (Error e) {
         return new ResponseEntity<>("An Error was encountered during connection to db", HttpStatus.BAD_REQUEST);

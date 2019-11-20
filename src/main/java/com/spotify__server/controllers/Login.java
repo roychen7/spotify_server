@@ -49,7 +49,7 @@ public class Login {
     
     @GetMapping("/testloginlistener")
     public void testlol() {
-        System.out.println(server_listener.getConnectCount());
+        System.out.println(server_listener.getConnected());
     }
     
     // returns code 200 once a valid token is stored in the database. will be in endless loop until this happens
