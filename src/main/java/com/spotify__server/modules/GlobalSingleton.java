@@ -6,7 +6,7 @@
 package com.spotify__server.modules;
 
 import com.spotify__server.repositories.JdbcRepository;
-import com.spotify__server.threads.MainThread;
+import com.spotify__server.executable.MainThread;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.concurrent.Executor;
@@ -49,25 +49,11 @@ public class GlobalSingleton {
         
         access_token = EntityUtils.toString(response.getEntity());
         single_executor = Executors.newSingleThreadExecutor();
-        
-        get = new HttpGet("https://api.spotify.com/v1/me/player");
-        get.addHeader("Authorization", "Bearer " + access_token);
-        response = client.execute(get);
-        
-        String str = HelperClass.getResponseString(response.getEntity());
-        JSONParser parser = new JSONParser();
-        JSONObject obj = (JSONObject) parser.parse(str);
-        
-        play = (boolean) obj.get("is_playing");
-        System.out.println("IS PLAYING IS : " + obj.get("is_playing"));
-        
+                
         }catch (IOException ex) {
                 System.out.println("ioexception");
                 Logger.getLogger(MainThread.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (ParseException ex) {
-                System.out.println("parseexception");
-                Logger.getLogger(MainThread.class.getName()).log(Level.SEVERE, null, ex);
-    }
+            } 
     }
     
     public static GlobalSingleton getInstance() {

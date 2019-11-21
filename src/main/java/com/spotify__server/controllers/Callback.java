@@ -9,7 +9,7 @@ import com.spotify__server.modules.GlobalSingleton;
 import com.spotify__server.modules.HelperClass;
 import com.spotify__server.modules.ServerListener;
 import com.spotify__server.repositories.JdbcRepository;
-import com.spotify__server.threads.MainThread;
+import com.spotify__server.executable.MainThread;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;

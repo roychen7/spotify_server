@@ -9,7 +9,7 @@ import com.spotify__server.modules.GlobalSingleton;
 import com.spotify__server.modules.HelperClass;
 import com.spotify__server.modules.ServerListener;
 import com.spotify__server.repositories.JdbcRepository;
-import com.spotify__server.threads.MainThread;
+import com.spotify__server.executable.MainThread;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -119,8 +119,10 @@ public class Token {
             con.close();
             if (Integer.toString(code).charAt(0) == "2".charAt(0)) {
                 if (server_listener.getConnected() == 0) {
+                    boolean play_status = server_listener.getPlayStatus();
                     Executor executor = GlobalSingleton.getInstance().getExecutor();
-                    MainThread t1 = new MainThread();
+                    MainThread t1 = new MainThread(play_status);
+                    server_listener.addObserver(t1);
                     executor.execute(t1);                   
                     server_listener.setConnected(1);
                 }
@@ -170,7 +172,7 @@ public class Token {
         String access_token = (String) jsonObj.get("access_token");
         stmt.executeUpdate("update `token` set `access_token`='" +access_token+ "'");
         con.close();
-        GlobalSingleton.getInstance().updateToken(access_token);
+        server_listener.updateAccessToken();
         
         System.out.println("updated token!");
         return new ResponseEntity<>("", HttpStatus.ACCEPTED);

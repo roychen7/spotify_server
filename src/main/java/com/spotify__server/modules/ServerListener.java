@@ -12,6 +12,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Observable;
+import java.util.Observer;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
@@ -27,7 +28,7 @@ import org.springframework.stereotype.Component;
  * @author roychen
  */
 @Component
-public class ServerListener {
+public class ServerListener extends Observable {
     private int connected;
     
     public void setConnected(int a) {
@@ -53,16 +54,21 @@ public class ServerListener {
         JSONParser parser = new JSONParser();
         JSONObject obj = (JSONObject) parser.parse(str);
         
+        
         return (boolean) obj.get("is_playing");
     }
     
     @CachePut(cacheNames="play_status")
     public boolean updateToFalse() {
+        setChanged();
+        notifyObservers(false);
         return false;
     }
     
     @CachePut(cacheNames="play_status")
     public boolean updateToTrue() {
+        setChanged();
+        notifyObservers(true);
         return true;
     }
     
