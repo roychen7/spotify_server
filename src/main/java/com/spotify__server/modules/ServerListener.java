@@ -5,6 +5,7 @@
  */
 package com.spotify__server.modules;
 
+import com.spotify__server.executable.MainThread;
 import com.spotify__server.repositories.JdbcRepository;
 import java.io.IOException;
 import java.sql.Connection;
@@ -28,8 +29,10 @@ import org.springframework.stereotype.Component;
  * @author roychen
  */
 @Component
-public class ServerListener extends Observable {
+public class ServerListener {
     private int connected;
+    private MainThread main_thread;
+    public final String test = "";
     
     public void setConnected(int a) {
         connected = a;
@@ -40,7 +43,10 @@ public class ServerListener extends Observable {
         return connected;
     }
     
-    @Cacheable(cacheNames = "play_status") 
+    public void setThread(MainThread mt) {
+        this.main_thread = mt;
+    }
+    
     public boolean getPlayStatus() throws SQLException, IOException, ParseException {
         HttpGet get = new HttpGet("https://api.spotify.com/v1/me/player");
         get.addHeader("Authorization", "Bearer " + getAccessToken());
@@ -58,18 +64,12 @@ public class ServerListener extends Observable {
         return (boolean) obj.get("is_playing");
     }
     
-    @CachePut(cacheNames="play_status")
-    public boolean updateToFalse() {
-        setChanged();
-        notifyObservers(false);
-        return false;
+    public void updateToFalse() {
+        main_thread.updatePlayStatus(false);
     }
     
-    @CachePut(cacheNames="play_status")
-    public boolean updateToTrue() {
-        setChanged();
-        notifyObservers(true);
-        return true;
+    public void updateToTrue() {
+        main_thread.updatePlayStatus(true);
     }
     
     @Cacheable(cacheNames = "getToken")

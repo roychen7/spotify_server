@@ -61,32 +61,36 @@ public class Login {
         headers.set("Access-Control-Allow-Origin", "http://localhost:3000");
         
         // getting connection to mysql database
-        try (Connection con = JdbcRepository.getConnection()) {
-        Statement stmt = con.createStatement();
-        String str = "select `access_token` from `token`";
-//        System.out.println("BEFORE LOOP");
         
         // loops to check if valid access token is inside mysql table, if valid then return valid access code (eg. 200),
         // if invalid token is given then loop breaks and returns invalid access code (eg. 400)a
-        while (true) {
-//            System.out.println("INSIDE LOOP");
-        ResultSet rs = stmt.executeQuery(str);
-        String s = "";
-        if (rs.next()) {
-//            System.out.println("Inside IF STATEMENT INSIDE LOOP ");
-            s = rs.getString(1);
-//            System.out.println(s);
-            int resp = HelperClass.verifyToken(s);
-            String temp = Integer.toString(resp);
-            if (temp.charAt(0) == "2".charAt(0)) {
-                con.close();
-                return new ResponseEntity<>(resp, headers, HttpStatus.ACCEPTED);
+//        while (true) {
+////            System.out.println("INSIDE LOOP");
+//        ResultSet rs = stmt.executeQuery(str);
+//        String s = "";
+//        if (rs.next()) {
+////            System.out.println("Inside IF STATEMENT INSIDE LOOP ");
+//            s = rs.getString(1);
+////            System.out.println(s);
+//            int resp = HelperClass.verifyToken(s);
+//            String temp = Integer.toString(resp);
+//            if (temp.charAt(0) == "2".charAt(0)) {
+//                con.close();
+//                return new ResponseEntity<>(resp, headers, HttpStatus.ACCEPTED);
+//        }
+//        }
+//        Thread.sleep(500);
+//        }
+        int responseCode;
+        synchronized (server_listener.test) {
+            while (Integer.toString(responseCode = HelperClass.verifyToken(server_listener.getAccessToken())).charAt(0) != "2".charAt(0)) {
+                System.out.println("/login right before waiting");
+                server_listener.test.wait();
+                System.out.println("/login awoke from waiting");
+            }
+            System.out.println("/login before returning");
+            return new ResponseEntity<>(responseCode, headers, HttpStatus.ACCEPTED);
         }
-        }
-        Thread.sleep(500);
-        }
-    } catch (Error e) {
-        return new ResponseEntity<>("An Error was encountered during connection to db", HttpStatus.BAD_REQUEST);
-    }
-    }
+//        return new ResponseEntity<>(responseCode, headers, HttpStatus.ACCEPTED);
+    }   
 }

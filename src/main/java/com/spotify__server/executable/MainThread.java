@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
  *
  * @author roychen
  */
-public class MainThread implements Runnable, Observer {
+public class MainThread implements Runnable {
     
     private int play_time;
     private int pause_time;
@@ -38,9 +38,6 @@ public class MainThread implements Runnable, Observer {
     private HttpClient client;
     private HttpGet get_pause;
     private HttpGet get_play;
-    
-//    @Autowired
-//    private ServerListener server_listener;
                 
     public MainThread(boolean play_status) {
         System.out.println("main thread created!");
@@ -59,10 +56,9 @@ public class MainThread implements Runnable, Observer {
         t.schedule(new Execute(), 0, 1000);
         t.schedule(new Refresh(), 0, 3600000);
     }
-
-    @Override
-    public void update(Observable o, Object arg) {
-        play_status = (boolean) arg;
+    
+    public void updatePlayStatus(boolean b) {
+        this.play_status = b;
     }
     
     class Execute extends TimerTask {

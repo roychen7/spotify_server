@@ -56,10 +56,13 @@ import org.springframework.context.annotation.ComponentScan;
 @ComponentScan("com.spotify__server")
 public class Callback {
     
+    @Autowired
+    private ServerListener server_listener;
+    
     // uses authorization code to request for access token, and then stores it in db once retrieved
     @RequestMapping("/callback") 
     public ResponseEntity callback(@RequestParam String code) throws MalformedURLException, JSONException, UnsupportedEncodingException, IOException, ParseException, SQLException {
-        System.out.println("callback inside!");
+        System.out.println("/callback");
         
         // initializing client and httpPost (post request is to get access token from given access code in req URL)
         HttpClient client = HttpClients.createDefault();
@@ -102,10 +105,16 @@ public class Callback {
             stmt.executeUpdate("delete from `token`");
         }
         
-        System.out.println("after rs.next()");
+        System.out.println("/callback after rs.next()");
         String str = "insert into `token` (`access_token`, `refresh_token`) values ('" +access_token+ "','" +refresh_token+ "')";
         stmt.executeUpdate(str);
+        server_listener.updateAccessToken();
         con.close();
+        
+        synchronized(server_listener.test) {
+            server_listener.test.notifyAll();
+            System.out.println("/callback notified thread");
+        }
         
         return new ResponseEntity<>("Loading...", HttpStatus.ACCEPTED);
         } catch (Error e) {

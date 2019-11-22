@@ -122,9 +122,9 @@ public class Token {
                     boolean play_status = server_listener.getPlayStatus();
                     Executor executor = GlobalSingleton.getInstance().getExecutor();
                     MainThread t1 = new MainThread(play_status);
-                    server_listener.addObserver(t1);
                     executor.execute(t1);                   
                     server_listener.setConnected(1);
+                    server_listener.setThread(t1);
                 }
             System.out.println("SERVER connected: " + server_listener.getConnected());
             }
