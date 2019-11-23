@@ -3,17 +3,16 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.spotify__server.modules;
+package com.spotify__server.components.listeners;
 
 import com.spotify__server.executable.MainThread;
+import com.spotify__server.modules.HelperClass;
 import com.spotify__server.repositories.JdbcRepository;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Observable;
-import java.util.Observer;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
@@ -28,8 +27,10 @@ import org.springframework.stereotype.Component;
  *
  * @author roychen
  */
+
+// class for listening to/storing active spotify playback properties (eg. song, volume, etc.)
 @Component
-public class ServerListener {
+public class SpotifyPlayerListener {
     private int connected;
     private MainThread main_thread;
     public final String test = "";
@@ -40,7 +41,7 @@ public class ServerListener {
     
     
     public int getConnected() {
-        return connected;
+        return connected;               
     }
     
     public void setThread(MainThread mt) {
@@ -60,9 +61,10 @@ public class ServerListener {
         JSONParser parser = new JSONParser();
         JSONObject obj = (JSONObject) parser.parse(str);
         
-        
         return (boolean) obj.get("is_playing");
     }
+    
+    
     
     public void updateToFalse() {
         main_thread.updatePlayStatus(false);

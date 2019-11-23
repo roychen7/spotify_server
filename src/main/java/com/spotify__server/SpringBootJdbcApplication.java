@@ -1,6 +1,6 @@
 package com.spotify__server;
 
-import com.spotify__server.modules.GlobalSingleton;
+import com.spotify__server.components.ThreadExecutor;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;

@@ -5,8 +5,7 @@
  */
 package com.spotify__server.controllers;
 
-import com.spotify__server.modules.GlobalSingleton;
-import com.spotify__server.modules.ServerListener;
+import com.spotify__server.components.listeners.SpotifyPlayerListener;
 import com.spotify__server.repositories.JdbcRepository;
 import java.io.IOException;
 import java.sql.Connection;
@@ -36,7 +35,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class Player {
     
     @Autowired
-    private ServerListener server_listener;
+    private SpotifyPlayerListener spotify_player_listener;
     
     // mapping for pausing current song
     @GetMapping("/pause")
@@ -61,13 +60,14 @@ public class Player {
         
         HttpResponse response = client.execute(put);
         
-        server_listener.updateToFalse();
+        spotify_player_listener.updateToFalse();
         return new ResponseEntity<>(response, headers, HttpStatus.ACCEPTED);
      } catch (Error e) {
         return new ResponseEntity<>("An Error was encountered during connection to db", HttpStatus.BAD_REQUEST);
     }
     }
     
+    // mapping for updating MainThread's playStatus boolean to false through calling SpotifyListener's function
     @GetMapping("/pause_upd")
     public ResponseEntity pauseUpd() {
         
@@ -75,7 +75,7 @@ public class Player {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Access-Control-Allow-Origin", "http://localhost:3000");
         
-        server_listener.updateToFalse();
+        spotify_player_listener.updateToFalse();
         return new ResponseEntity<>("", headers, HttpStatus.ACCEPTED);
     }
     // mapping for playing current song
@@ -102,20 +102,21 @@ public class Player {
         
         HttpResponse response = client.execute(put);
         
-        server_listener.updateToTrue();
+        spotify_player_listener.updateToTrue();
         return new ResponseEntity<>(response, headers, HttpStatus.ACCEPTED);
         } catch (Error e) {
         return new ResponseEntity<>("An Error was encountered during connection to db", HttpStatus.BAD_REQUEST);
     }
     }
     
+    // mapping for updating MainThread's playStatus boolean to true through calling SpotifyListener's function
     @GetMapping("/play_upd")
     public ResponseEntity playUpd() {
         System.out.println("Player.js://play_upd");
         HttpHeaders headers = new HttpHeaders();
         headers.set("Access-Control-Allow-Origin", "http://localhost:3000");
         
-        server_listener.updateToTrue();
+        spotify_player_listener.updateToTrue();
         return new ResponseEntity<>("", headers, HttpStatus.ACCEPTED);
     }
 }

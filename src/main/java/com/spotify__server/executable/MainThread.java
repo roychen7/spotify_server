@@ -5,29 +5,21 @@
  */
 package com.spotify__server.executable;
 
-import com.spotify__server.modules.ServerListener;
 import java.io.IOException;
-import java.sql.SQLException;
-import java.util.Observable;
-import java.util.Observer;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.minidev.json.parser.ParseException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClients;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RestController;
 
 /**
  *
  * @author roychen
  */
+
+// thread class responsible for initializing/scheduling time-scheduled tasks in the program
 public class MainThread implements Runnable {
     
     private int play_time;

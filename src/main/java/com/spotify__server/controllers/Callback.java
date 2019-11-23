@@ -5,14 +5,11 @@
  */
 package com.spotify__server.controllers;
 
-import com.spotify__server.modules.GlobalSingleton;
 import com.spotify__server.modules.HelperClass;
-import com.spotify__server.modules.ServerListener;
+import com.spotify__server.components.listeners.SpotifyPlayerListener;
 import com.spotify__server.repositories.JdbcRepository;
-import com.spotify__server.executable.MainThread;
-import java.io.BufferedReader;
+import com.spotify__server.components.listeners.UserListener;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.sql.Connection;
@@ -51,15 +48,18 @@ import org.springframework.context.annotation.ComponentScan;
  */
 // 
 
-// this is the class for dealing with the redirect uri while trying to authorize the spotify api
+// deals with the redirect uri while trying to authorize the spotify api
 @RestController
 @ComponentScan("com.spotify__server")
 public class Callback {
     
     @Autowired
-    private ServerListener server_listener;
+    private SpotifyPlayerListener server_listener;
     
-    // uses authorization code to request for access token, and then stores it in db once retrieved
+    @Autowired
+    private UserListener user_listener;
+    
+    // uses authorization code to request for access token, stores it in db once retrieved
     @RequestMapping("/callback") 
     public ResponseEntity callback(@RequestParam String code) throws MalformedURLException, JSONException, UnsupportedEncodingException, IOException, ParseException, SQLException {
         System.out.println("/callback");
@@ -108,7 +108,7 @@ public class Callback {
         System.out.println("/callback after rs.next()");
         String str = "insert into `token` (`access_token`, `refresh_token`) values ('" +access_token+ "','" +refresh_token+ "')";
         stmt.executeUpdate(str);
-        server_listener.updateAccessToken();
+        user_listener.updateAccessToken();
         con.close();
         
         synchronized(server_listener.test) {

@@ -31,6 +31,7 @@ public class JdbcRepository {
     static {
         config.setJdbcUrl("jdbc:mysql://localhost:3306/spotifyserver");
         config.setUsername("root");
+        config.setPassword("omg1t5n0tm3");
         ds = new HikariDataSource(config);
     }
 
