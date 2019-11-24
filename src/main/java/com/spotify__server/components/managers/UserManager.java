@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.spotify__server.components.listeners;
+package com.spotify__server.components.managers;
 
 import com.spotify__server.repositories.JdbcRepository;
 import java.io.IOException;
@@ -27,8 +27,6 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
-import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 
@@ -89,19 +87,21 @@ public class UserManager extends ApplicationManager {
                 playlist_ids_from_db.add(rs.getString(1));
             }
             
-            List<String> tables_to_add_playlist = missingPlaylists(playlist_ids_from_db, playlist_ids_list);
+            List<Pair<String, String>> tables_to_add_playlist = missingPlaylists(playlist_ids_from_db, playlist_ids_list);
+            
             for (int i = 0; i < tables_to_add_playlist.size(); i++) {
-//                stmt.executeUpdate("")
+                stmt.executeUpdate("insert into `playlists` (`playlist_id`, `playlist_name`) values "
+                    + "('" + tables_to_add_playlist.get(i).getKey() + "', '"+ tables_to_add_playlist.get(i).getValue() + "');");
             }
         }
     }
     
-    private List<String> missingPlaylists(HashSet<String> db_playlists, List<Pair<String, String>> user_playlists) {
-        List<String> ret = new ArrayList<>();
+    private List<Pair<String, String>> missingPlaylists(HashSet<String> db_playlists, List<Pair<String, String>> user_playlists) {
+        List<Pair<String, String>> ret = new ArrayList<>();
         
         for (int i = 0; i < user_playlists.size(); i++) {
             if (!db_playlists.contains(user_playlists.get(i).getKey())) {
-                ret.add(user_playlists.get(i).getKey());
+                ret.add(new Pair(user_playlists.get(i).getKey(), user_playlists.get(i).getValue()));
             }
         }
         
@@ -121,7 +121,6 @@ public class UserManager extends ApplicationManager {
         HttpResponse resp = client.execute(get);
         HttpEntity entity = resp.getEntity();
         String s = EntityUtils.toString(entity);
-//        System.out.println("UserManager::getUserId's access token: " + s);
         JSONObject jsonObj = (JSONObject) parser.parse(s);
         
         return jsonObj.getAsString("id");

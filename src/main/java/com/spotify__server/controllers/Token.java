@@ -7,10 +7,10 @@ package com.spotify__server.controllers;
 
 import com.spotify__server.components.ThreadExecutor;
 import com.spotify__server.modules.HelperClass;
-import com.spotify__server.components.listeners.SpotifyPlayerManager;
+import com.spotify__server.components.managers.SpotifyPlayerManager;
 import com.spotify__server.repositories.JdbcRepository;
 import com.spotify__server.executable.MainThread;
-import com.spotify__server.components.listeners.UserManager;
+import com.spotify__server.components.managers.UserManager;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -53,13 +53,13 @@ public class Token {
     static String refresh_token;
     
     @Autowired
-    private SpotifyPlayerManager spotify_player_listener;
+    private SpotifyPlayerManager spotify_player_manager;
     
     @Autowired
     private ThreadExecutor thread_executor;
 
     @Autowired
-    private UserManager user_listener;
+    private UserManager user_manager;
     
     // returns the token stored in the database
     @GetMapping("/token")
@@ -70,7 +70,7 @@ public class Token {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Access-Control-Allow-Origin", "http://localhost:3000");
 
-        String ress = user_listener.getAccessToken();
+        String ress = user_manager.getAccessToken();
          
         return new ResponseEntity<>(ress, headers, HttpStatus.ACCEPTED);
     }
@@ -79,7 +79,7 @@ public class Token {
     @GetMapping("/update")
     public void test() throws IOException, SQLException {
         System.out.println("connecting from Token::/update");
-        user_listener.updateAccessToken();
+        user_manager.updateAccessToken();
     }
     
     
@@ -107,23 +107,22 @@ public class Token {
             
             con.close();
             if (Integer.toString(code).charAt(0) == "2".charAt(0)) {
-                if (spotify_player_listener.getConnected() == 0) {
+                if (spotify_player_manager.getConnected() == 0) {
                     
-                    spotify_player_listener.initPlayStatus();
-                    spotify_player_listener.setConnected(1);
+                    spotify_player_manager.initPlayStatus();
+                    spotify_player_manager.setConnected(1);
                     
-                    MainThread t1 = new MainThread(spotify_player_listener);
+                    MainThread t1 = new MainThread(spotify_player_manager);
                     thread_executor.getInstance().execute(t1);    
                     
-//                    user_listener.updateProperties();
+                    user_manager.updateProperties();
                 }
-            System.out.println("SERVER connected: " + spotify_player_listener.getConnected());
+            System.out.println("SERVER connected: " + spotify_player_manager.getConnected());
             }
         
              return new ResponseEntity<>(code, headers, HttpStatus.ACCEPTED);
         }
-    }  
-    
+    }
     
     // use refresh token to obtain new access token and store it in the db
     @GetMapping("/refresh")
@@ -164,7 +163,7 @@ public class Token {
         stmt.executeUpdate("update `token` set `access_token`='" +access_token+ "'");
         con.close();
         
-        user_listener.updateAccessToken();
+        user_manager.updateAccessToken();
         System.out.println("Token::/refresh: updated token!");
         
         return new ResponseEntity<>("", HttpStatus.ACCEPTED);

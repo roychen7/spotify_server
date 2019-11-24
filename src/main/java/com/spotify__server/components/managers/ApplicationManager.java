@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.spotify__server.components.listeners;
+package com.spotify__server.components.managers;
 
 import com.spotify__server.repositories.JdbcRepository;
 import java.io.IOException;

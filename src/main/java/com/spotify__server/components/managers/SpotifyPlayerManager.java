@@ -3,18 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.spotify__server.components.listeners;
+package com.spotify__server.components.managers;
 
-import com.spotify__server.executable.MainThread;
 import com.spotify__server.modules.HelperClass;
-import com.spotify__server.repositories.JdbcRepository;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.Observable;
-import java.util.Observer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.minidev.json.JSONObject;
@@ -25,8 +18,6 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.impl.client.HttpClients;
-import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 /**
@@ -58,6 +49,7 @@ public class SpotifyPlayerManager extends ApplicationManager {
         String str = HelperClass.getResponseString(response.getEntity());
         if (str.equals(null) || "".equals(str)) {
             play_status = false;
+            return;
         }
         
         JSONParser parser = new JSONParser();

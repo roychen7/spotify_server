@@ -13,8 +13,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import com.spotify__server.modules.HelperClass;
-import com.spotify__server.components.listeners.SpotifyPlayerManager;
-import com.spotify__server.components.listeners.UserManager;
+import com.spotify__server.components.managers.SpotifyPlayerManager;
+import com.spotify__server.components.managers.UserManager;
 import com.spotify__server.repositories.JdbcRepository;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -45,19 +45,19 @@ public class Login {
     
     
     @Autowired
-    private SpotifyPlayerManager server_listener;
+    private SpotifyPlayerManager spotify_player_manager;
     
     @Autowired
-    private UserManager user_listener;
+    private UserManager user_manager;
     
     
     @GetMapping("/test")
     public ResponseEntity testlol() throws IOException, SQLException, ParseException {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Access-Control-Allow-Origin", "http://localhost:3000");
-        String s = user_listener.getUserId();
+        String s = user_manager.getUserId();
             HttpGet get = new HttpGet("https://api.spotify.com/v1/users/" + s + "/playlists");
-            get.addHeader("Authorization", "Bearer " + user_listener.getAccessToken());
+            get.addHeader("Authorization", "Bearer " + user_manager.getAccessToken());
             HttpClient client = HttpClients.createDefault();
             
             HttpResponse http_response = client.execute(get);
@@ -88,41 +88,18 @@ public class Login {
         }
     }
     
-    // If no valid token is stored in the database, waits on a test object. Once awoken, will double-check condition and return code 200
-    // if valid token is now stored in database
+    // thread sleeps until awoken, and checks if token in db is valid, returns code 2xx if it is, if invalid, then sleeps again and repeats process
     @GetMapping("/login")
     public ResponseEntity login() throws MalformedURLException, IOException, InterruptedException, SQLException {
         
         // setting headers to allow access from electron application from localhost:3000
         HttpHeaders headers = new HttpHeaders();
         headers.set("Access-Control-Allow-Origin", "http://localhost:3000");
-        
-        // getting connection to mysql database
-        
-        // loops to check if valid access token is inside mysql table, if valid then return valid access code (eg. 200),
-        // if invalid token is given then loop breaks and returns invalid access code (eg. 400)a
-//        while (true) {
-////            System.out.println("INSIDE LOOP");
-//        ResultSet rs = stmt.executeQuery(str);
-//        String s = "";
-//        if (rs.next()) {
-////            System.out.println("Inside IF STATEMENT INSIDE LOOP ");
-//            s = rs.getString(1);
-////            System.out.println(s);
-//            int resp = HelperClass.verifyToken(s);
-//            String temp = Integer.toString(resp);
-//            if (temp.charAt(0) == "2".charAt(0)) {
-//                con.close();
-//                return new ResponseEntity<>(resp, headers, HttpStatus.ACCEPTED);
-//        }
-//        }
-//        Thread.sleep(500);
-//        }
         int responseCode;
-        synchronized (server_listener.test) {
-            while (Integer.toString(responseCode = HelperClass.verifyToken(user_listener.getAccessToken())).charAt(0) != "2".charAt(0)) {
+        synchronized (spotify_player_manager.test) {
+            while (Integer.toString(responseCode = HelperClass.verifyToken(user_manager.getAccessToken())).charAt(0) != "2".charAt(0)) {
                 System.out.println("/login right before waiting");
-                server_listener.test.wait();
+                spotify_player_manager.test.wait();
                 System.out.println("/login awoke from waiting");
             }
             System.out.println("/login before returning");

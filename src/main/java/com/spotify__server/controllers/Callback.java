@@ -6,9 +6,9 @@
 package com.spotify__server.controllers;
 
 import com.spotify__server.modules.HelperClass;
-import com.spotify__server.components.listeners.SpotifyPlayerManager;
+import com.spotify__server.components.managers.SpotifyPlayerManager;
 import com.spotify__server.repositories.JdbcRepository;
-import com.spotify__server.components.listeners.UserManager;
+import com.spotify__server.components.managers.UserManager;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
@@ -54,10 +54,10 @@ import org.springframework.context.annotation.ComponentScan;
 public class Callback {
     
     @Autowired
-    private SpotifyPlayerManager server_listener;
+    private SpotifyPlayerManager spotify_player_manager;
     
     @Autowired
-    private UserManager user_listener;
+    private UserManager user_manager;
     
     // uses authorization code to request for access token, stores it in db once retrieved
     @RequestMapping("/callback") 
@@ -108,11 +108,11 @@ public class Callback {
         System.out.println("/callback after rs.next()");
         String str = "insert into `token` (`access_token`, `refresh_token`) values ('" +access_token+ "','" +refresh_token+ "')";
         stmt.executeUpdate(str);
-        user_listener.updateAccessToken();
+        user_manager.updateAccessToken();
         con.close();
         
-        synchronized(server_listener.test) {
-            server_listener.test.notifyAll();
+        synchronized(spotify_player_manager.test) {
+            spotify_player_manager.test.notifyAll();
             System.out.println("/callback notified thread");
         }
         

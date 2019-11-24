@@ -5,7 +5,7 @@
  */
 package com.spotify__server.executable;
 
-import com.spotify__server.components.listeners.SpotifyPlayerManager;
+import com.spotify__server.components.managers.SpotifyPlayerManager;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Timer;
