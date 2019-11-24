@@ -13,8 +13,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import com.spotify__server.modules.HelperClass;
-import com.spotify__server.components.listeners.SpotifyPlayerListener;
-import com.spotify__server.components.listeners.UserListener;
+import com.spotify__server.components.listeners.SpotifyPlayerManager;
+import com.spotify__server.components.listeners.UserManager;
+import com.spotify__server.repositories.JdbcRepository;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
@@ -41,10 +45,10 @@ public class Login {
     
     
     @Autowired
-    private SpotifyPlayerListener server_listener;
+    private SpotifyPlayerManager server_listener;
     
     @Autowired
-    private UserListener user_listener;
+    private UserManager user_listener;
     
     
     @GetMapping("/test")
@@ -67,6 +71,21 @@ public class Login {
             
         
         return new ResponseEntity<>(ret, headers, HttpStatus.ACCEPTED);
+    }
+    
+    @GetMapping("/testlol")
+    public ResponseEntity testloll() throws SQLException, IOException {
+        try (Connection con = JdbcRepository.getConnection()) {
+            Statement stmt = con.createStatement();
+            
+            ResultSet rs = stmt.executeQuery("Show tables");
+            String res = "";
+            while (rs.next()) {
+                res = res + rs.getString(1);
+            }
+            
+            return new ResponseEntity<>(res, HttpStatus.ACCEPTED);
+        }
     }
     
     // If no valid token is stored in the database, waits on a test object. Once awoken, will double-check condition and return code 200

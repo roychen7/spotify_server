@@ -13,11 +13,17 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Observable;
+import java.util.Observer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.impl.client.HttpClients;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -28,12 +34,12 @@ import org.springframework.stereotype.Component;
  * @author roychen
  */
 
-// class for listening to/storing active spotify playback properties (eg. song, volume, etc.)
+// deals with managing active spotify playback properties (eg. song, volume, etc.)
 @Component
-public class SpotifyPlayerListener {
+public class SpotifyPlayerManager extends ApplicationManager {
     private int connected;
-    private MainThread main_thread;
     public final String test = "";
+    private boolean play_status;
     
     public void setConnected(int a) {
         connected = a;
@@ -44,61 +50,56 @@ public class SpotifyPlayerListener {
         return connected;               
     }
     
-    public void setThread(MainThread mt) {
-        this.main_thread = mt;
-    }
-    
-    public boolean getPlayStatus() throws SQLException, IOException, ParseException {
+    public void initPlayStatus() throws SQLException, IOException, ParseException {
         HttpGet get = new HttpGet("https://api.spotify.com/v1/me/player");
         get.addHeader("Authorization", "Bearer " + getAccessToken());
         HttpResponse response = HttpClients.createDefault().execute(get);
         
         String str = HelperClass.getResponseString(response.getEntity());
         if (str.equals(null) || "".equals(str)) {
-            return false;
+            play_status = false;
         }
         
         JSONParser parser = new JSONParser();
         JSONObject obj = (JSONObject) parser.parse(str);
         
-        return (boolean) obj.get("is_playing");
+        play_status = (boolean) obj.get("is_playing");
     }
     
-    
-    
-    public void updateToFalse() {
-        main_thread.updatePlayStatus(false);
+    public boolean getPlayStatus() {
+        return play_status;
     }
     
-    public void updateToTrue() {
-        main_thread.updatePlayStatus(true);
+    public void setPlayStatus(boolean b) {
+        this.play_status = b;
     }
     
-    @Cacheable(cacheNames = "getToken")
-    public String getAccessToken() throws SQLException, IOException {
-        System.out.println("not cached!");
-        try (Connection con = JdbcRepository.getConnection()) {
-            Statement stmt = con.createStatement();
-            ResultSet rs = stmt.executeQuery("select `access_token` from `token`");
-            
-            if (rs.next()) {
-                return rs.getString(1);
-            }
-            return null;
+    public void togglePlayback(boolean b) {
+        HttpClient client = HttpClients.createDefault();
+        HttpPut put;
+        
+        if (b== true) {
+            put = new HttpPut("https://api.spotify.com/v1/me/player/play");
+        } else {
+            put = new HttpPut("https://api.spotify.com/v1/me/player/pause");
         }
-    }
-    
-    @CachePut(cacheNames="getToken")
-    public String updateAccessToken() throws SQLException, IOException {
-        System.out.println("updating access token!");
-        try (Connection con = JdbcRepository.getConnection()) {
-            Statement stmt = con.createStatement();
-            ResultSet rs = stmt.executeQuery("select `access_token` from `token`");
+               
+        try {
+            String access_token = getAccessToken();
+            put.addHeader("Authorization", "Bearer " + access_token);
+
+            HttpResponse response = client.execute(put);
+                    
+            if (b== true) {
+                play_status = true;
+            } else {
+                play_status = false;
+            } 
             
-            if (rs.next()) {
-                return rs.getString(1);
+            } catch (IOException ex) {
+                Logger.getLogger(SpotifyPlayerManager.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (SQLException ex) {
+                Logger.getLogger(SpotifyPlayerManager.class.getName()).log(Level.SEVERE, null, ex);
             }
-            return null;
-        }
     }
 }

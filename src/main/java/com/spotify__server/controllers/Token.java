@@ -7,10 +7,10 @@ package com.spotify__server.controllers;
 
 import com.spotify__server.components.ThreadExecutor;
 import com.spotify__server.modules.HelperClass;
-import com.spotify__server.components.listeners.SpotifyPlayerListener;
+import com.spotify__server.components.listeners.SpotifyPlayerManager;
 import com.spotify__server.repositories.JdbcRepository;
 import com.spotify__server.executable.MainThread;
-import com.spotify__server.components.listeners.UserListener;
+import com.spotify__server.components.listeners.UserManager;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -53,13 +53,14 @@ public class Token {
     static String refresh_token;
     
     @Autowired
-    private SpotifyPlayerListener spotify_player_listener;
+    private SpotifyPlayerManager spotify_player_listener;
     
     @Autowired
     private ThreadExecutor thread_executor;
 
     @Autowired
-    private UserListener user_listener;
+    private UserManager user_listener;
+    
     // returns the token stored in the database
     @GetMapping("/token")
     public ResponseEntity getToken() throws SQLException, IOException, ParseException {
@@ -68,23 +69,8 @@ public class Token {
         // allowing cross-origin access from localhost:3000
         HttpHeaders headers = new HttpHeaders();
         headers.set("Access-Control-Allow-Origin", "http://localhost:3000");
-        
-//        try (Connection con = JdbcRepository.getConnection()) {
-//        Statement stmt = con.createStatement();
-//        
-//        // grab the "access token" from the database
-//        String str = "select `access_token` from `token`";
-//        ResultSet rs = stmt.executeQuery(str);
-//        
-//        String code = "";
-//        if (rs.next()) {
-//            code = rs.getString(1);
-//        }
-//        
-//        con.close();
-//        return code;
 
-         String ress = user_listener.getAccessToken();
+        String ress = user_listener.getAccessToken();
          
         return new ResponseEntity<>(ress, headers, HttpStatus.ACCEPTED);
     }
@@ -108,24 +94,28 @@ public class Token {
         headers.set("Access-Control-Allow-Origin", "http://localhost:3000");
         try (Connection con = JdbcRepository.getConnection()) {
             Statement stmt = con.createStatement();
+            
             // grab the "access token" from the database
             String str = "select `access_token` from `token`";
             ResultSet rs = stmt.executeQuery(str);
             
-//          set code to 2xx if access token is valid, default of 4xx (invalid)
+            // set code to 2xx if access token is valid, default of 4xx (invalid)
             int code = 400;
             if (rs.next()) {
                 code = HelperClass.verifyToken(rs.getString(1));
             }
+            
             con.close();
             if (Integer.toString(code).charAt(0) == "2".charAt(0)) {
                 if (spotify_player_listener.getConnected() == 0) {
-                    boolean play_status = spotify_player_listener.getPlayStatus();
-                    MainThread t1 = new MainThread(play_status);
-                    thread_executor.getInstance().execute(t1);                   
+                    
+                    spotify_player_listener.initPlayStatus();
                     spotify_player_listener.setConnected(1);
-                    spotify_player_listener.setThread(t1);
-                    user_listener.updateProperties();
+                    
+                    MainThread t1 = new MainThread(spotify_player_listener);
+                    thread_executor.getInstance().execute(t1);    
+                    
+//                    user_listener.updateProperties();
                 }
             System.out.println("SERVER connected: " + spotify_player_listener.getConnected());
             }

@@ -11,8 +11,13 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.util.Pair;
+import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
@@ -25,8 +30,6 @@ import org.apache.http.util.EntityUtils;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 /**
@@ -34,9 +37,12 @@ import org.springframework.stereotype.Component;
  * @author roychen
  */
 
-// deals with listening to user information (eg. access token, user id, user playlists, etc.)
+// get all of a user's playlists in a list, can access each of the playlists' respective names and ids
+// in the database, store playlist by id
+
+// deals with managing user information (eg. access token, user id, user playlists, etc.)
 @Component
-public class UserListener {
+public class UserManager extends ApplicationManager {
     
     public void updateProperties() {
         try {
@@ -51,16 +57,55 @@ public class UserListener {
             JSONObject json_response_object = (JSONObject) parser.parse(response_string);
             
             System.out.println(json_response_object.get("items").getClass());
+            JSONArray resp_array = (JSONArray) json_response_object.get("items");
+            
+            List<Pair<String, String>> playlist_ids_list = new ArrayList<>();
+            
+            for (int i = 0; i < resp_array.size(); i++) {
+                JSONObject obj = (JSONObject) resp_array.get(i);
+                playlist_ids_list.add(new Pair(obj.getAsString("id"), obj.getAsString("name")));
+            }
+            
+            initPlaylistAndSongsInDb(playlist_ids_list);
             
             
         } catch (SQLException ex) {
-            Logger.getLogger(UserListener.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(UserManager.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
-            Logger.getLogger(UserListener.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(UserManager.class.getName()).log(Level.SEVERE, null, ex);
         } catch (ParseException ex) {
-            Logger.getLogger(UserListener.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(UserManager.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    private void initPlaylistAndSongsInDb(List<Pair<String, String>> playlist_ids_list) throws SQLException, IOException {
+        try (Connection con = JdbcRepository.getConnection()) {
+            Statement stmt = con.createStatement();
+            
+            ResultSet rs = stmt.executeQuery("select playlist_id from playlists");
+            HashSet<String> playlist_ids_from_db = new HashSet<>();
+            
+            while (rs.next()) {
+                playlist_ids_from_db.add(rs.getString(1));
+            }
+            
+            List<String> tables_to_add_playlist = missingPlaylists(playlist_ids_from_db, playlist_ids_list);
+            for (int i = 0; i < tables_to_add_playlist.size(); i++) {
+//                stmt.executeUpdate("")
+            }
+        }
+    }
+    
+    private List<String> missingPlaylists(HashSet<String> db_playlists, List<Pair<String, String>> user_playlists) {
+        List<String> ret = new ArrayList<>();
+        
+        for (int i = 0; i < user_playlists.size(); i++) {
+            if (!db_playlists.contains(user_playlists.get(i).getKey())) {
+                ret.add(user_playlists.get(i).getKey());
+            }
         }
         
+        return ret;
     }
     
     public String getUserId() throws SQLException, IOException, ParseException {
@@ -76,37 +121,9 @@ public class UserListener {
         HttpResponse resp = client.execute(get);
         HttpEntity entity = resp.getEntity();
         String s = EntityUtils.toString(entity);
-//        System.out.println("UserListener::getUserId's access token: " + s);
+//        System.out.println("UserManager::getUserId's access token: " + s);
         JSONObject jsonObj = (JSONObject) parser.parse(s);
         
         return jsonObj.getAsString("id");
-    }
-    
-    @Cacheable(cacheNames = "getToken")
-    public String getAccessToken() throws SQLException, IOException {
-        System.out.println("not cached!");
-        try (Connection con = JdbcRepository.getConnection()) {
-            Statement stmt = con.createStatement();
-            ResultSet rs = stmt.executeQuery("select `access_token` from `token`");
-            
-            if (rs.next()) {
-                return rs.getString(1);
-            }
-            return null;
-        }
-    }
-    
-    @CachePut(cacheNames="getToken")
-    public String updateAccessToken() throws SQLException, IOException {
-        System.out.println("updating access token!");
-        try (Connection con = JdbcRepository.getConnection()) {
-            Statement stmt = con.createStatement();
-            ResultSet rs = stmt.executeQuery("select `access_token` from `token`");
-            
-            if (rs.next()) {
-                return rs.getString(1);
-            }
-            return null;
-        }
     }
 }
