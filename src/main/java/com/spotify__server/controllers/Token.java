@@ -11,6 +11,7 @@ import com.spotify__server.components.managers.SpotifyPlayerManager;
 import com.spotify__server.repositories.JdbcRepository;
 import com.spotify__server.executable.MainThread;
 import com.spotify__server.components.managers.UserManager;
+import com.spotify__server.database_access.DatabaseAccesser;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -67,7 +68,7 @@ public class Token {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Access-Control-Allow-Origin", "http://localhost:3000");
 
-        String ress = user_manager.getAccessToken();
+        String ress = DatabaseAccesser.getAccessToken();
          
         return new ResponseEntity<>(ress, headers, HttpStatus.ACCEPTED);
     }
@@ -76,7 +77,7 @@ public class Token {
     @GetMapping("/update")
     public void test() throws IOException, SQLException {
         System.out.println("connecting from Token::/update");
-        user_manager.updateAccessToken();
+        DatabaseAccesser.updateAccessToken();
     }
     
     
@@ -112,7 +113,7 @@ public class Token {
                     MainThread t1 = new MainThread(spotify_player_manager);
                     thread_executor.getInstance().execute(t1);    
                     
-                    user_manager.updateProperties();
+//                    user_manager.updateProperties();
                 }
             System.out.println("SERVER connected: " + spotify_player_manager.getConnected());
             }
@@ -160,7 +161,7 @@ public class Token {
         stmt.executeUpdate("update `token` set `access_token`='" +access_token+ "'");
         con.close();
         
-        user_manager.updateAccessToken();
+        DatabaseAccesser.updateAccessToken();
         System.out.println("Token::/refresh: updated token!");
         
         return new ResponseEntity<>("", HttpStatus.ACCEPTED);

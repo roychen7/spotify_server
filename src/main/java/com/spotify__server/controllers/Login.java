@@ -16,6 +16,7 @@ import com.spotify__server.modules.HelperClass;
 import com.spotify__server.components.managers.SpotifyPlayerManager;
 import com.spotify__server.components.managers.UserManager;
 import com.spotify__server.repositories.JdbcRepository;
+import com.spotify__server.database_access.DatabaseAccesser;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
@@ -23,7 +24,6 @@ import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
-import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
@@ -57,7 +57,7 @@ public class Login {
         headers.set("Access-Control-Allow-Origin", "http://localhost:3000");
         String s = user_manager.getUserId();
             HttpGet get = new HttpGet("https://api.spotify.com/v1/users/" + s + "/playlists");
-            get.addHeader("Authorization", "Bearer " + user_manager.getAccessToken());
+            get.addHeader("Authorization", "Bearer " + DatabaseAccesser.getAccessToken());
             HttpClient client = HttpClients.createDefault();
             
             HttpResponse http_response = client.execute(get);
@@ -83,6 +83,7 @@ public class Login {
             while (rs.next()) {
                 res = res + rs.getString(1);
             }
+            con.close();
             
             return new ResponseEntity<>(res, HttpStatus.ACCEPTED);
         }
@@ -97,7 +98,7 @@ public class Login {
         headers.set("Access-Control-Allow-Origin", "http://localhost:3000");
         int responseCode;
         synchronized (spotify_player_manager.test) {
-            while (Integer.toString(responseCode = HelperClass.verifyToken(user_manager.getAccessToken())).charAt(0) != "2".charAt(0)) {
+            while (Integer.toString(responseCode = HelperClass.verifyToken(DatabaseAccesser.getAccessToken())).charAt(0) != "2".charAt(0)) {
                 System.out.println("/login right before waiting");
                 spotify_player_manager.test.wait();
                 System.out.println("/login awoke from waiting");

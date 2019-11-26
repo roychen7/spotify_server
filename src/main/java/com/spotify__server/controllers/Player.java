@@ -6,6 +6,7 @@
 package com.spotify__server.controllers;
 
 import com.spotify__server.components.managers.SpotifyPlayerManager;
+import com.spotify__server.database_access.DatabaseAccesser;
 import com.spotify__server.repositories.JdbcRepository;
 import java.io.IOException;
 import java.sql.Connection;
@@ -42,17 +43,7 @@ public class Player {
         HttpClient client = HttpClients.createDefault();
         HttpPut put = new HttpPut("https://api.spotify.com/v1/me/player/pause");
         
-        try (Connection con = JdbcRepository.getConnection()) {
-        Statement stmt = con.createStatement();
-        ResultSet rs = stmt.executeQuery("select `access_token` from `token`");
-        String s = "";
-        
-        if (rs.next()) {
-            s = rs.getString(1);
-        }
-        con.close();
-        
-        put.addHeader("Authorization", "Bearer " + s);
+        put.addHeader("Authorization", "Bearer " + DatabaseAccesser.getAccessToken());
         
         HttpHeaders headers = new HttpHeaders();
         headers.set("Access-Control-Allow-Origin", "http://localhost:3000");
@@ -61,10 +52,8 @@ public class Player {
         
         spotify_player_manager.setPlayStatus(false);
         return new ResponseEntity<>(response, headers, HttpStatus.ACCEPTED);
-     } catch (Error e) {
-        return new ResponseEntity<>("An Error was encountered during connection to db", HttpStatus.BAD_REQUEST);
     }
-    }
+    
     
     // mapping for updating MainThread's playStatus boolean to false through calling SpotifyListener's function
     @GetMapping("/pause_upd")
@@ -89,18 +78,7 @@ public class Player {
         HttpClient client = HttpClients.createDefault();
         HttpPut put = new HttpPut("https://api.spotify.com/v1/me/player/play");
         
-        try (Connection con = JdbcRepository.getConnection()) {
-        Statement stmt = con.createStatement();
-        ResultSet rs = stmt.executeQuery("select `access_token` from `token`");
-        
-        String s = "";
-        
-        if (rs.next()) {
-            s = rs.getString(1);
-        }
-        
-        con.close();
-        put.addHeader("Authorization", "Bearer " + s);
+        put.addHeader("Authorization", "Bearer " + DatabaseAccesser.getAccessToken());
         
         HttpHeaders headers = new HttpHeaders();
         headers.set("Access-Control-Allow-Origin", "http://localhost:3000");
@@ -109,9 +87,6 @@ public class Player {
         
         spotify_player_manager.setPlayStatus(true);
         return new ResponseEntity<>(response, headers, HttpStatus.ACCEPTED);
-        } catch (Error e) {
-        return new ResponseEntity<>("An Error was encountered during connection to db", HttpStatus.BAD_REQUEST);
-    }
     }
     
     // mapping for updating MainThread's playStatus boolean to true through calling SpotifyListener's function

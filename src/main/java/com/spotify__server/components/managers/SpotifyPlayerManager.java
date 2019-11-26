@@ -6,6 +6,7 @@
 package com.spotify__server.components.managers;
 
 import com.spotify__server.modules.HelperClass;
+import com.spotify__server.database_access.DatabaseAccesser;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.logging.Level;
@@ -25,9 +26,9 @@ import org.springframework.stereotype.Component;
  * @author roychen
  */
 
-// deals with managing active spotify playback properties (eg. song, volume, etc.)
+// responsible for managing active spotify playback properties (eg. song, volume, etc.)
 @Component
-public class SpotifyPlayerManager extends ApplicationManager {
+public class SpotifyPlayerManager {
     private int connected;
     public final String test = "";
     private boolean play_status;
@@ -43,7 +44,7 @@ public class SpotifyPlayerManager extends ApplicationManager {
     
     public void initPlayStatus() throws SQLException, IOException, ParseException {
         HttpGet get = new HttpGet("https://api.spotify.com/v1/me/player");
-        get.addHeader("Authorization", "Bearer " + getAccessToken());
+        get.addHeader("Authorization", "Bearer " + DatabaseAccesser.getAccessToken());
         HttpResponse response = HttpClients.createDefault().execute(get);
         
         String str = HelperClass.getResponseString(response.getEntity());
@@ -77,7 +78,7 @@ public class SpotifyPlayerManager extends ApplicationManager {
         }
                
         try {
-            String access_token = getAccessToken();
+            String access_token = DatabaseAccesser.getAccessToken();
             put.addHeader("Authorization", "Bearer " + access_token);
 
             HttpResponse response = client.execute(put);

@@ -24,7 +24,6 @@ import org.springframework.stereotype.Component;
  */
 
 // thread class responsible for initializing/scheduling time-scheduled tasks in the program
-@Component
 public class MainThread implements Runnable {
     
     private int play_time = 0;

@@ -6,6 +6,7 @@
 package com.spotify__server.components.managers;
 
 import com.spotify__server.repositories.JdbcRepository;
+import com.spotify__server.database_access.DatabaseAccesser;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -40,13 +41,13 @@ import org.springframework.stereotype.Component;
 
 // deals with managing user information (eg. access token, user id, user playlists, etc.)
 @Component
-public class UserManager extends ApplicationManager {
+public class UserManager {
     
     public void updateProperties() {
         try {
             String s = getUserId();
             HttpGet get = new HttpGet("https://api.spotify.com/v1/users/" + s + "/playlists");
-            get.addHeader("Authorization", "Bearer " + getAccessToken());
+            get.addHeader("Authorization", "Bearer " + DatabaseAccesser.getAccessToken());
             HttpClient client = HttpClients.createDefault();
             
             HttpResponse http_response = client.execute(get);
@@ -64,8 +65,7 @@ public class UserManager extends ApplicationManager {
                 playlist_ids_list.add(new Pair(obj.getAsString("id"), obj.getAsString("name")));
             }
             
-            initPlaylistAndSongsInDb(playlist_ids_list);
-            
+            initUserPlaylistAndSongsInDb(playlist_ids_list);            
             
         } catch (SQLException ex) {
             Logger.getLogger(UserManager.class.getName()).log(Level.SEVERE, null, ex);
@@ -76,7 +76,7 @@ public class UserManager extends ApplicationManager {
         }
     }
     
-    private void initPlaylistAndSongsInDb(List<Pair<String, String>> playlist_ids_list) throws SQLException, IOException {
+    private void initUserPlaylistAndSongsInDb(List<Pair<String, String>> playlist_ids_list) throws SQLException, IOException {
         try (Connection con = JdbcRepository.getConnection()) {
             Statement stmt = con.createStatement();
             
@@ -88,12 +88,34 @@ public class UserManager extends ApplicationManager {
             }
             
             List<Pair<String, String>> tables_to_add_playlist = missingPlaylists(playlist_ids_from_db, playlist_ids_list);
+            List<String> list_playlist_ids = new ArrayList<>();
             
             for (int i = 0; i < tables_to_add_playlist.size(); i++) {
                 stmt.executeUpdate("insert into `playlists` (`playlist_id`, `playlist_name`) values "
                     + "('" + tables_to_add_playlist.get(i).getKey() + "', '"+ tables_to_add_playlist.get(i).getValue() + "');");
+                list_playlist_ids.add(tables_to_add_playlist.get(i).getKey());
             }
+            con.close();
+//            initPlaylistSongs(list_playlist_ids);
         }
+    }
+    
+    private void initPlaylistSongs(List<String> list_playlist_ids) throws SQLException, IOException, ParseException {
+        for (int i = 0; i < list_playlist_ids.size(); i++) {
+            initSongsFromPlaylistId(list_playlist_ids.get(i));
+        }
+    }
+
+    private void initSongsFromPlaylistId(String playlist_id) throws SQLException, IOException, ParseException {
+        HttpGet get = new HttpGet("https://api.spotify.com/v1/playlists/" + playlist_id + "/tracks?fields=items(added_at%2Ctrack(name%2Cid%2Cduration_ms%2Calbum%2Cartists))");
+        HttpClient client = HttpClients.createDefault();
+        
+        get.addHeader("Authorization", "Bearer " + DatabaseAccesser.getAccessToken());
+        
+        HttpResponse response = client.execute(get);
+        String response_string = EntityUtils.toString(response.getEntity());
+        JSONParser parser = new JSONParser();
+        JSONObject obj = (JSONObject) parser.parse(response_string);
     }
     
     private List<Pair<String, String>> missingPlaylists(HashSet<String> db_playlists, List<Pair<String, String>> user_playlists) {
@@ -116,7 +138,7 @@ public class UserManager extends ApplicationManager {
         
         JSONParser parser = new JSONParser();
         
-        String access_token = getAccessToken();
+        String access_token = DatabaseAccesser.getAccessToken();
         get.addHeader("Authorization", "Bearer " + access_token);
         HttpResponse resp = client.execute(get);
         HttpEntity entity = resp.getEntity();
