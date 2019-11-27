@@ -13,6 +13,8 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import net.minidev.json.parser.ParseException;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -39,19 +41,24 @@ public class Player {
         
     // mapping for pausing current song
     @GetMapping("/pause")
-    public ResponseEntity pauseSong() throws SQLException, IOException, ParseException {
-        HttpClient client = HttpClients.createDefault();
-        HttpPut put = new HttpPut("https://api.spotify.com/v1/me/player/pause");
-        
-        put.addHeader("Authorization", "Bearer " + DatabaseAccesser.getAccessToken());
-        
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Access-Control-Allow-Origin", "http://localhost:3000");
-        
-        HttpResponse response = client.execute(put);
-        
-        spotify_player_manager.setPlayStatus(false);
-        return new ResponseEntity<>(response, headers, HttpStatus.ACCEPTED);
+    public ResponseEntity pauseSong() {
+        HttpHeaders headers = null; 
+        try {
+            HttpClient client = HttpClients.createDefault();
+            HttpPut put = new HttpPut("https://api.spotify.com/v1/me/player/pause");
+            
+            put.addHeader("Authorization", "Bearer " + DatabaseAccesser.getAccessToken());
+            
+            headers = new HttpHeaders();
+            headers.set("Access-Control-Allow-Origin", "http://localhost:3000");
+            
+            HttpResponse response = client.execute(put);
+            
+            spotify_player_manager.setPlayStatus(false);
+            return new ResponseEntity<>(response, headers, HttpStatus.ACCEPTED);
+        } catch (IOException ex) {
+            return new ResponseEntity<>(ex.getMessage(), headers, HttpStatus.NOT_FOUND);
+        }
     }
     
     
@@ -74,19 +81,24 @@ public class Player {
     
     // mapping for playing current song
     @GetMapping("/play")
-    public ResponseEntity playSong() throws SQLException, IOException, ParseException {
-        HttpClient client = HttpClients.createDefault();
-        HttpPut put = new HttpPut("https://api.spotify.com/v1/me/player/play");
-        
-        put.addHeader("Authorization", "Bearer " + DatabaseAccesser.getAccessToken());
-        
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Access-Control-Allow-Origin", "http://localhost:3000");
-        
-        HttpResponse response = client.execute(put);
-        
-        spotify_player_manager.setPlayStatus(true);
-        return new ResponseEntity<>(response, headers, HttpStatus.ACCEPTED);
+    public ResponseEntity playSong() {
+        HttpHeaders headers = null;
+        try {
+            HttpClient client = HttpClients.createDefault();
+            HttpPut put = new HttpPut("https://api.spotify.com/v1/me/player/play");
+            
+            put.addHeader("Authorization", "Bearer " + DatabaseAccesser.getAccessToken());
+            
+            headers = new HttpHeaders();
+            headers.set("Access-Control-Allow-Origin", "http://localhost:3000");
+            
+            HttpResponse response = client.execute(put);
+            
+            spotify_player_manager.setPlayStatus(true);
+            return new ResponseEntity<>(response, headers, HttpStatus.ACCEPTED);
+        } catch (IOException ex) {
+            return new ResponseEntity<>(ex.getMessage(), headers, HttpStatus.NOT_FOUND);
+        }
     }
     
     // mapping for updating MainThread's playStatus boolean to true through calling SpotifyListener's function

@@ -30,6 +30,8 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 
@@ -38,19 +40,30 @@ import org.springframework.stereotype.Component;
  * @author roychen
  */
 
-@Component
-public class PlaylistInitializer {
-
+public class PlaylistInitializer implements Runnable {
+    
     private SongInitializer song_initializer;
 
-    public void setSongInitializer(SongInitializer song_initializer) {
+    public void addSongListener(SongInitializer song_listener) {
         this.song_initializer = song_initializer;
     }
     
+    public PlaylistInitializer(SongInitializer song_initializer) {
+        this.song_initializer = song_initializer;
+    }
+    
+    public void test() {
+        if (song_initializer!= null) {
+            System.out.println("initialized song initializer inside playlistInitializer");
+        } else {
+            System.out.println("Didn't initialize song initializer inside playlistInitializer");
+        }
+    }
+    
     public void updatePlaylists() throws IOException, ParseException, SQLException {    
+//        System.out.println("PlaylistInitializer::getUserId");
         String user_id = getUserId();
-        
-        // change get to grab user's playlists
+               
         HttpGet get = new HttpGet("https://api.spotify.com/v1/users/" + user_id + "/playlists");
         get.addHeader("Authorization", "Bearer " + DatabaseAccesser.getAccessToken());
         
@@ -73,7 +86,8 @@ public class PlaylistInitializer {
         initUserPlaylistAndSongsInDb(playlist_ids_list);              
         }
 
-        private void initUserPlaylistAndSongsInDb(List<Pair<String, String>> playlist_ids_list) throws SQLException, IOException {
+        private void initUserPlaylistAndSongsInDb(List<Pair<String, String>> playlist_ids_list) throws SQLException, IOException, ParseException {
+//            System.out.println("PlaylistInitializer::initUserPlaylistAndSongsInDb");
             try (Connection con = JdbcRepository.getConnection()) {
                 Statement stmt = con.createStatement();
                 
@@ -94,11 +108,12 @@ public class PlaylistInitializer {
                 }
                 con.close();
                 
-            //    initPlaylistSongs(list_playlist_ids);
+                song_initializer.initPlaylistSongs(list_playlist_ids);
             }
         }
 
         private List<Pair<String, String>> missingPlaylists(HashSet<String> db_playlists, List<Pair<String, String>> user_playlists) {
+//            System.out.println("PlaylistInitializer::missingPlaylists");
             List<Pair<String, String>> ret = new ArrayList<>();
             
             for (int i = 0; i < user_playlists.size(); i++) {
@@ -111,7 +126,9 @@ public class PlaylistInitializer {
 
         
         private String getUserId() throws IOException, ParseException, SQLException {
-            HttpGet get = new HttpGet("https://api.spotify.com/v1/me");
+//        System.out.println("PlaylistInitializer::getUserId");
+            
+        HttpGet get = new HttpGet("https://api.spotify.com/v1/me");
         HttpClient client = HttpClients.createDefault();
         HttpHeaders headers = new HttpHeaders();
         headers.set("Access-Control-Allow-Origin", "http://localhost:3000");
@@ -128,5 +145,18 @@ public class PlaylistInitializer {
         JSONObject jsonObj = (JSONObject) parser.parse(entity_string);      
         jsonObj = (JSONObject) parser.parse(entity_string);
         return jsonObj.getAsString("id");
+    }
+
+    @Override
+    public void run() {
+        try {
+            updatePlaylists();
+        } catch (IOException ex) {
+            Logger.getLogger(PlaylistInitializer.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ParseException ex) {
+            Logger.getLogger(PlaylistInitializer.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException ex) {
+            Logger.getLogger(PlaylistInitializer.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 }

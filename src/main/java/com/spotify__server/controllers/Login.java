@@ -48,8 +48,7 @@ public class Login {
     private SpotifyPlayerManager spotify_player_manager;
     
     @Autowired
-    private UserManager user_manager;
-    
+    private UserManager user_manager;    
     
     @GetMapping("/test")
     public ResponseEntity testlol() throws IOException, SQLException, ParseException {
@@ -74,18 +73,9 @@ public class Login {
     }
     
     @GetMapping("/testlol")
-    public ResponseEntity testloll() throws SQLException, IOException {
+    public void testloll() throws SQLException, IOException {
         try (Connection con = JdbcRepository.getConnection()) {
-            Statement stmt = con.createStatement();
-            
-            ResultSet rs = stmt.executeQuery("Show tables");
-            String res = "";
-            while (rs.next()) {
-                res = res + rs.getString(1);
-            }
-            con.close();
-            
-            return new ResponseEntity<>(res, HttpStatus.ACCEPTED);
+            System.out.println("lol inside");
         }
     }
     

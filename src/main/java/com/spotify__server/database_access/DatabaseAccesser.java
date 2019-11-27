@@ -11,6 +11,9 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.springframework.cache.annotation.CachePut;
@@ -34,7 +37,6 @@ public class DatabaseAccesser {
             return rs.getString(1);
         }
         
-        con.close();
         } catch (IOException ex) {
             Logger.getLogger(DatabaseAccesser.class.getName()).log(Level.SEVERE, null, ex);
         } catch (SQLException ex) {
@@ -55,12 +57,31 @@ public class DatabaseAccesser {
             return rs.getString(1);
         }
         
-        con.close();
         } catch (IOException ex) {
             Logger.getLogger(DatabaseAccesser.class.getName()).log(Level.SEVERE, null, ex);
         } catch (SQLException ex) {
             Logger.getLogger(DatabaseAccesser.class.getName()).log(Level.SEVERE, null, ex);
         }
         return "";
+    }
+    
+    public static void insertIntoDb(String query) throws SQLException, IOException {
+        try (Connection con = JdbcRepository.getConnection()) {
+            Statement stmt = con.createStatement();
+            stmt.executeUpdate(query);
+        }
+    }
+    
+    public static HashSet<String> getExistingSongs() throws SQLException, IOException {
+        System.out.println("DAtabaseAccesser::getExistingSongs");
+        try (Connection con = JdbcRepository.getConnection()) {
+            Statement stmt = con.createStatement();
+            ResultSet rs = stmt.executeQuery("select `song_id` from `songs`");
+            HashSet<String> result = new HashSet<>();
+            while (rs.next()) {
+                result.add(rs.getString(1));
+            }
+            return result;
+        }
     }
 }

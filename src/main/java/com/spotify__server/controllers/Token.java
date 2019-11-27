@@ -6,6 +6,8 @@
 package com.spotify__server.controllers;
 
 import com.spotify__server.components.ThreadExecutor;
+import com.spotify__server.components.initializers.PlaylistInitializer;
+import com.spotify__server.components.initializers.SongInitializer;
 import com.spotify__server.modules.HelperClass;
 import com.spotify__server.components.managers.SpotifyPlayerManager;
 import com.spotify__server.repositories.JdbcRepository;
@@ -19,6 +21,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
@@ -55,13 +59,10 @@ public class Token {
     
     @Autowired
     private ThreadExecutor thread_executor;
-
-    @Autowired
-    private UserManager user_manager;
     
     // returns the token stored in the database
     @GetMapping("/token")
-    public ResponseEntity getToken() throws SQLException, IOException, ParseException {
+    public ResponseEntity getToken() {
         System.out.println("controllers:token/token");
         
         // allowing cross-origin access from localhost:3000
@@ -84,7 +85,7 @@ public class Token {
     // tests whether token is valid or not by calling HelperClass's verifyToken function 
     // TODO: MAY NEED TO REFACTOR LATER ON. REMOVE SINGLETON
     @GetMapping("/valid_token")
-    public ResponseEntity tokenExists() throws SQLException, IOException, ParseException {
+    public ResponseEntity tokenExists() {
         System.out.println("controllers:token:/valid_token");
         
         // allowing cross-origin access from localhost:3000
@@ -113,18 +114,25 @@ public class Token {
                     MainThread t1 = new MainThread(spotify_player_manager);
                     thread_executor.getInstance().execute(t1);    
                     
-//                    user_manager.updateProperties();
+                    Thread t2 = new Thread(new PlaylistInitializer(new SongInitializer()));
+                    t2.start();
                 }
             System.out.println("SERVER connected: " + spotify_player_manager.getConnected());
             }
         
              return new ResponseEntity<>(code, headers, HttpStatus.ACCEPTED);
+        } catch (ParseException ex) {
+            return new ResponseEntity<>(ex.getMessage(), headers, HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (SQLException ex) {
+            return new ResponseEntity<>(ex.getMessage(), headers, HttpStatus.SERVICE_UNAVAILABLE);
+        } catch (IOException ex) {
+            return new ResponseEntity<>(ex.getMessage(), headers, HttpStatus.NOT_FOUND);
         }
     }
     
     // use refresh token to obtain new access token and store it in the db
     @GetMapping("/refresh")
-    public ResponseEntity getRefreshToken() throws SQLException, IOException, ParseException {
+    public ResponseEntity getRefreshToken() {
         
         // 1. use refresh token to access and obtain new access token
         // 2. replace the old one in the db with the new access token
@@ -167,6 +175,12 @@ public class Token {
         return new ResponseEntity<>("", HttpStatus.ACCEPTED);
     } catch (Error e) {
         return new ResponseEntity<>("An Error was encountered during connection to db", HttpStatus.BAD_REQUEST);
-    }
+    }   catch (SQLException ex) {
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (IOException ex) {
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
+        } catch (ParseException ex) {
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }

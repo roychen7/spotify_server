@@ -83,15 +83,13 @@ public class SpotifyPlayerManager {
 
             HttpResponse response = client.execute(put);
                     
-            if (b== true) {
+            if (b == true) {
                 play_status = true;
             } else {
                 play_status = false;
             } 
             
             } catch (IOException ex) {
-                Logger.getLogger(SpotifyPlayerManager.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (SQLException ex) {
                 Logger.getLogger(SpotifyPlayerManager.class.getName()).log(Level.SEVERE, null, ex);
             }
     }
