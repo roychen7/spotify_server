@@ -72,6 +72,17 @@ public class DatabaseAccesser {
         }
     }
     
+    public static String getFromDb(String query) throws SQLException, IOException {
+        try (Connection con = JdbcRepository.getConnection()) {
+            Statement stmt = con.createStatement();
+            ResultSet rs = stmt.executeQuery(query);
+            if (rs.next()) {
+                return rs.getString(1);
+            } 
+            return "";
+        }
+    }
+    
     public static HashSet<String> getExistingSongs() throws SQLException, IOException {
         System.out.println("DAtabaseAccesser::getExistingSongs");
         try (Connection con = JdbcRepository.getConnection()) {

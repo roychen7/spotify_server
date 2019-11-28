@@ -99,16 +99,16 @@ public class PlaylistInitializer implements Runnable {
                 }
                 
                 List<Pair<String, String>> tables_to_add_playlist = missingPlaylists(playlist_ids_from_db, playlist_ids_list);
-                List<String> list_playlist_ids = new ArrayList<>();
+                List<Pair<String, String>> list_playlist_ids_names = new ArrayList<>();
                 
                 for (int i = 0; i < tables_to_add_playlist.size(); i++) {
                     stmt.executeUpdate("insert into `playlists` (`playlist_id`, `playlist_name`) values "
                         + "('" + tables_to_add_playlist.get(i).getKey() + "', '"+ tables_to_add_playlist.get(i).getValue() + "');");
-                    list_playlist_ids.add(tables_to_add_playlist.get(i).getKey());
+                    list_playlist_ids_names.add(new Pair(tables_to_add_playlist.get(i).getKey(), tables_to_add_playlist.get(i).getValue()));
                 }
                 con.close();
                 
-                song_initializer.initPlaylistSongs(list_playlist_ids);
+                song_initializer.initPlaylistSongs(list_playlist_ids_names);
             }
         }
 
@@ -150,6 +150,7 @@ public class PlaylistInitializer implements Runnable {
     @Override
     public void run() {
         try {
+            System.out.println("running updatePlaylists!");
             updatePlaylists();
         } catch (IOException ex) {
             Logger.getLogger(PlaylistInitializer.class.getName()).log(Level.SEVERE, null, ex);
