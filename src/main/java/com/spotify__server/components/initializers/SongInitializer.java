@@ -4,9 +4,6 @@ import java.io.IOException;
 import java.sql.SQLException;
 
 import com.spotify__server.database_access.DatabaseAccesser;
-import com.spotify__server.repositories.JdbcRepository;
-import java.sql.Connection;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import net.minidev.json.JSONArray;
@@ -16,7 +13,6 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
-import org.springframework.stereotype.Component;
 
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
@@ -71,10 +67,11 @@ import javafx.util.Pair;
             
             if (!existing_song_ids.contains(song_id)) {
                 if ((ind_of_quote = song_name.indexOf("'")) == -1) {
-                insert_string = "insert into `songs` values ('" + playlist_id + "', '" + playlist_name + "', '" + song_id + "', '" + song_name + "', '" + song_duration + "')";
+                insert_string = "insert into `songs` values ('" + playlist_id + "', '" + playlist_name + "', '" + song_id + "', '" + song_name + "', '" + song_duration + "', '0')";
                 } else {
                     String song_name_reformatted = handleQuotation(song_name, ind_of_quote);   
-                    insert_string = "insert into `songs` values ('" + playlist_id + "', '" + playlist_name + "', '" + song_id + "', '" + song_name_reformatted + "', '" + song_duration + "')";
+                    
+                    insert_string = "insert into `songs` values ('" + playlist_id + "', '" + playlist_name + "', '" + song_id + "', '" + song_name_reformatted + "', '" + song_duration + "', '0')";
                 }
             }
             

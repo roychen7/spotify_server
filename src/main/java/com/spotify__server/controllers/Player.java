@@ -7,15 +7,7 @@ package com.spotify__server.controllers;
 
 import com.spotify__server.components.managers.SpotifyPlayerManager;
 import com.spotify__server.database_access.DatabaseAccesser;
-import com.spotify__server.repositories.JdbcRepository;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import net.minidev.json.parser.ParseException;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPut;

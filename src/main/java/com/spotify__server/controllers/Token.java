@@ -8,7 +8,7 @@ package com.spotify__server.controllers;
 import com.spotify__server.components.ThreadExecutor;
 import com.spotify__server.components.initializers.PlaylistInitializer;
 import com.spotify__server.components.initializers.SongInitializer;
-import com.spotify__server.modules.HelperClass;
+import com.spotify__server.utils.HelperClass;
 import com.spotify__server.components.managers.SpotifyPlayerManager;
 import com.spotify__server.repositories.JdbcRepository;
 import com.spotify__server.executable.MainThread;
@@ -122,10 +122,13 @@ public class Token {
         
              return new ResponseEntity<>(code, headers, HttpStatus.ACCEPTED);
         } catch (ParseException ex) {
+            System.out.println("parseException from token");
             return new ResponseEntity<>(ex.getMessage(), headers, HttpStatus.INTERNAL_SERVER_ERROR);
         } catch (SQLException ex) {
+            System.out.println("sqlexception from token");
             return new ResponseEntity<>(ex.getMessage(), headers, HttpStatus.SERVICE_UNAVAILABLE);
         } catch (IOException ex) {
+            System.out.println("ioException from token");
             return new ResponseEntity<>(ex.getMessage(), headers, HttpStatus.NOT_FOUND);
         }
     }

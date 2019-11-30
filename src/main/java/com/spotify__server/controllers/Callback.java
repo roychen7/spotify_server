@@ -5,7 +5,7 @@
  */
 package com.spotify__server.controllers;
 
-import com.spotify__server.modules.HelperClass;
+import com.spotify__server.utils.HelperClass;
 import com.spotify__server.components.managers.SpotifyPlayerManager;
 import com.spotify__server.repositories.JdbcRepository;
 import com.spotify__server.components.managers.UserManager;
@@ -52,9 +52,6 @@ public class Callback {
     
     @Autowired
     private SpotifyPlayerManager spotify_player_manager;
-    
-    @Autowired
-    private UserManager user_manager;
     
     // uses authorization code to request for access token, stores it in db once retrieved
     @RequestMapping("/callback") 

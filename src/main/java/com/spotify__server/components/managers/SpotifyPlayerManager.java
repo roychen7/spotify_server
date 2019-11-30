@@ -5,7 +5,7 @@
  */
 package com.spotify__server.components.managers;
 
-import com.spotify__server.modules.HelperClass;
+import com.spotify__server.utils.HelperClass;
 import com.spotify__server.database_access.DatabaseAccesser;
 import java.io.IOException;
 import java.sql.SQLException;
@@ -81,7 +81,7 @@ public class SpotifyPlayerManager {
             String access_token = DatabaseAccesser.getAccessToken();
             put.addHeader("Authorization", "Bearer " + access_token);
 
-            HttpResponse response = client.execute(put);
+            client.execute(put);
                     
             if (b == true) {
                 play_status = true;

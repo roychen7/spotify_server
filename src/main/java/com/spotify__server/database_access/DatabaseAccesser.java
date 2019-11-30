@@ -83,6 +83,7 @@ public class DatabaseAccesser {
         }
     }
     
+    @Cacheable(cacheNames="getExistingSongs")
     public static HashSet<String> getExistingSongs() throws SQLException, IOException {
         System.out.println("DAtabaseAccesser::getExistingSongs");
         try (Connection con = JdbcRepository.getConnection()) {
@@ -95,4 +96,6 @@ public class DatabaseAccesser {
             return result;
         }
     }
+    
+    
 }
