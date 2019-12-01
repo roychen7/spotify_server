@@ -58,20 +58,6 @@ public class JdbcRepository {
 
     // gets and returns a connection to mysql database according to properties in applocation.properties file 
     public static Connection getConnection() throws SQLException, FileNotFoundException, IOException {
-//        
-//        try {
-//            FileInputStream f = new FileInputStream("src/main/resources/application.properties");
-//            Properties p = new Properties();
-//            p.load(f);
-//            
-//            String url = p.getProperty("spring.datasource.url");
-//            String username = p.getProperty("spring.datasource.username");
-//            String password = p.getProperty("spring.datasource.password");
-//
-//            return DriverManager.getConnection(url, username, password);
-//        } catch (IOException e) {
-//            throw e;
-//        }
         return ds.getConnection();
     }
 }

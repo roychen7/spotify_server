@@ -5,7 +5,6 @@
  */
 package com.spotify__server.components.initializers;
 
-import com.spotify__server.components.managers.UserManager;
 import com.spotify__server.database_access.DatabaseAccesser;
 import com.spotify__server.repositories.JdbcRepository;
 
