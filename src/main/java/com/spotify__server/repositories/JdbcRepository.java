@@ -15,6 +15,8 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -29,10 +31,29 @@ public class JdbcRepository {
     private static HikariDataSource ds;
     
     static {
-        config.setJdbcUrl("jdbc:mysql://localhost:3306/spotifyserver");
-        config.setUsername("root");
-        config.setPassword("omg1t5n0tm3");
-        ds = new HikariDataSource(config);
+        FileInputStream f = null;
+        try {
+            f = new FileInputStream("src/main/resources/application.properties");
+            Properties p = new Properties();
+            p.load(f);
+            String url = p.getProperty("spring.datasource.url");
+            String username = p.getProperty("spring.datasource.username");
+            String password = p.getProperty("spring.datasource.password");
+            config.setJdbcUrl("jdbc:mysql://localhost:3306/spotifyserver");
+            config.setUsername("root");
+            config.setPassword("omg1t5n0tm3");
+            ds = new HikariDataSource(config);
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(JdbcRepository.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(JdbcRepository.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            try {
+                f.close();
+            } catch (IOException ex) {
+                Logger.getLogger(JdbcRepository.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
     }
 
     // gets and returns a connection to mysql database according to properties in applocation.properties file 

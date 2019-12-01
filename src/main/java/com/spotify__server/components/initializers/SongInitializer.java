@@ -39,7 +39,7 @@ import javafx.util.Pair;
 //     @param1 = playlist ID, @param2 = playlist name, @param3 = number of songs currently added to database, initialized to 0
     private void initSongsFromPlaylistId(String playlist_id, String playlist_name, int noOfResets) throws SQLException, IOException, ParseException, net.minidev.json.parser.ParseException {
 //        System.out.println("SongInitializer::initSongsFromPlaylistId");
-        HttpGet get = new HttpGet("https://api.spotify.com/v1/playlists/" + playlist_id + "/tracks?fields=items(added_at%2Ctrack(name%2Cid%2Cduration_ms%2Calbum%2Cartists))");
+        HttpGet get = new HttpGet("https://api.spotify.com/v1/playlists/" + playlist_id + "/tracks?fields=items(added_at%2Ctrack(name%2Cid%2Cduration_ms%2Calbum%2Cartists%2Curi))");
         HttpClient client = HttpClients.createDefault();
         
         get.addHeader("Authorization", "Bearer " + DatabaseAccesser.getAccessToken());
@@ -59,6 +59,7 @@ import javafx.util.Pair;
             String song_name = track_details.getAsString("name");
             String song_id = track_details.getAsString("id");
             String song_duration = track_details.getAsString("duration_ms");
+            String song_uri = track_details.getAsString("uri");
             
             String insert_string = "";
             
@@ -67,11 +68,11 @@ import javafx.util.Pair;
             
             if (!existing_song_ids.contains(song_id)) {
                 if ((ind_of_quote = song_name.indexOf("'")) == -1) {
-                insert_string = "insert into `songs` values ('" + playlist_id + "', '" + playlist_name + "', '" + song_id + "', '" + song_name + "', '" + song_duration + "', '0')";
+                insert_string = "insert into `songs` values ('" + playlist_id + "', '" + playlist_name + "', '" + song_id + "', '" + song_uri + "', '" + song_name + "', '" + song_duration + "', '0')";
                 } else {
                     String song_name_reformatted = handleQuotation(song_name, ind_of_quote);   
                     
-                    insert_string = "insert into `songs` values ('" + playlist_id + "', '" + playlist_name + "', '" + song_id + "', '" + song_name_reformatted + "', '" + song_duration + "', '0')";
+                    insert_string = "insert into `songs` values ('" + playlist_id + "', '" + playlist_name + "', '" + song_id + "', '" + song_uri + "', '" + song_name_reformatted + "', '" + song_duration + "', '0')";
                 }
             }
             
@@ -87,7 +88,7 @@ import javafx.util.Pair;
                 System.out.println ("noOfResets: " + noOfResets);
                 i = 0;
                 noOfResets += 100;
-                String fetchString = "https://api.spotify.com/v1/playlists/" + playlist_id + "/tracks?fields=items(added_at%2Ctrack(name%2Cid%2Cduration_ms%2Calbum%2Cartists))&offset=" + Integer.toString(noOfResets);
+                String fetchString = "https://api.spotify.com/v1/playlists/" + playlist_id + "/tracks?fields=items(added_at%2Ctrack(name%2Cid%2Cduration_ms%2Calbum%2Cartists%2Curi))&offset=" + Integer.toString(noOfResets);
                 System.out.println(fetchString);
                 get = new HttpGet(fetchString);
                 get.addHeader("Authorization", "Bearer " + DatabaseAccesser.getAccessToken());

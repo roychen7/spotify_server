@@ -1,3 +1,4 @@
+  
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -8,7 +9,6 @@ package com.spotify__server.controllers;
 import com.spotify__server.utils.HelperClass;
 import com.spotify__server.components.managers.SpotifyPlayerManager;
 import com.spotify__server.repositories.JdbcRepository;
-import com.spotify__server.components.managers.UserManager;
 import com.spotify__server.database_access.DatabaseAccesser;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;

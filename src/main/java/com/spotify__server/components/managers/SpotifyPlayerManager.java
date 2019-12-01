@@ -7,8 +7,12 @@ package com.spotify__server.components.managers;
 
 import com.spotify__server.utils.HelperClass;
 import com.spotify__server.database_access.DatabaseAccesser;
+import com.spotify__server.enums.PlaylistGenStatus;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.minidev.json.JSONObject;
@@ -32,15 +36,9 @@ public class SpotifyPlayerManager {
     private int connected;
     public final String test = "";
     private boolean play_status;
-    
-    public void setConnected(int a) {
-        connected = a;
-    }
-    
-    
-    public int getConnected() {
-        return connected;               
-    }
+    private PlaylistGenStatus pgs;
+    private List<String> saved_list;
+    HashSet<String> completed_playlists;
     
     public void initPlayStatus() throws SQLException, IOException, ParseException {
         HttpGet get = new HttpGet("https://api.spotify.com/v1/me/player");
@@ -57,6 +55,9 @@ public class SpotifyPlayerManager {
         JSONObject obj = (JSONObject) parser.parse(str);
         
         play_status = (boolean) obj.get("is_playing");
+        pgs = PlaylistGenStatus.FALSE;
+        saved_list = new ArrayList<>();
+        completed_playlists = new HashSet<>();
     }
     
     public boolean getPlayStatus() {
@@ -65,6 +66,33 @@ public class SpotifyPlayerManager {
     
     public void setPlayStatus(boolean b) {
         this.play_status = b;
+    }
+    
+    
+    public int getConnected() {
+        return connected;               
+    }
+    public void setConnected(int a) {
+        connected = a;
+    }
+    
+    
+    public void setPlaylistGeneratorStatus(PlaylistGenStatus pgs) {
+        this.pgs = pgs;
+    }
+    
+    public List<String> getSavedList() {
+        return saved_list;
+    }
+    
+    public void setSavedList(List<String> list) {
+        for (int i = 0; i < list.size(); i++) {
+            saved_list.add(list.get(i));
+        }
+    }
+    
+    public HashSet<String> getCompletedPlaylists() {
+        return completed_playlists;
     }
     
     public void togglePlayback(boolean b) {

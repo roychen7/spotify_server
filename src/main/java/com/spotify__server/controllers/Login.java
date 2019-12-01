@@ -17,13 +17,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import com.spotify__server.utils.HelperClass;
 import com.spotify__server.components.managers.SpotifyPlayerManager;
-import com.spotify__server.repositories.JdbcRepository;
 import com.spotify__server.database_access.DatabaseAccesser;
 import com.spotify__server.executable.MainThread;
-import java.sql.Connection;
+import java.util.ArrayList;
+import java.util.List;
+import net.minidev.json.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 /**
  *
@@ -41,34 +45,28 @@ public class Login {
     @Autowired
     private SpotifyPlayerManager spotify_player_manager;  
     
-//    @GetMapping("/test")
-//    public ResponseEntity testlol() throws IOException, SQLException, ParseException {
-//        HttpHeaders headers = new HttpHeaders();
-//        headers.set("Access-Control-Allow-Origin", "http://localhost:3000");
-//        String s = user_manager.getUserId();
-//            HttpGet get = new HttpGet("https://api.spotify.com/v1/users/" + s + "/playlists");
-//            get.addHeader("Authorization", "Bearer " + DatabaseAccesser.getAccessToken());
-//            HttpClient client = HttpClients.createDefault();
-//            
-//            HttpResponse http_response = client.execute(get);
-//            String response_string = EntityUtils.toString(http_response.getEntity());
-//            JSONParser parser = new JSONParser();
-//            JSONObject json_response_object = (JSONObject) parser.parse(response_string);
-//            String ret = (String) json_response_object.getAsString("items");
-//            
-//            JSONArray items_array = (JSONArray) json_response_object.get("items");
-//            
-//            
-//        
-//        return new ResponseEntity<>(ret, headers, HttpStatus.ACCEPTED);
-//    }
-//    
-    @GetMapping("/testlol")
-    public void testloll() throws SQLException, IOException {
-        try (Connection con = JdbcRepository.getConnection()) {
-            System.out.println("lol inside");
-        }
+    @GetMapping("/test")
+    public ResponseEntity testlol() throws IOException, SQLException, ParseException {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Access-Control-Allow-Origin", "http://localhost:3000");
+        
+        List<String> list = new ArrayList<>();
+        list.add("hi");
+        list.add("1");
+        list.add("two");
+        return new ResponseEntity<>(list, headers, HttpStatus.ACCEPTED);
     }
+   
+   
+    @RequestMapping(value="/testgenerator", method={RequestMethod.POST}, consumes = "application/x-www-form-urlencoded")
+    public ResponseEntity getWeightedPlaylistMixSongs(@RequestBody String songs) {
+        System.out.println("Login::/testgenerator");
+        
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Access-Control-Allow-Origin", "http://localhost:3000"); 
+            
+        return new ResponseEntity<>("asdf", headers, HttpStatus.ACCEPTED);
+        }
     
     // thread sleeps until awoken, and checks if token in db is valid, returns code 2xx if it is, if invalid, then sleeps again and repeats process
     @GetMapping("/login")
