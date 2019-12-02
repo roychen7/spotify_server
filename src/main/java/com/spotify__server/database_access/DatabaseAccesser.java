@@ -141,9 +141,13 @@ public class DatabaseAccesser {
     public static List<Song> getRandomPlaylistSongs(HashSet<String> completed_playlists) throws SQLException, IOException {
         List<String> playlist_names = getPlaylistNames();
         Random random = new Random();
-        String random_playlist_name;
+        String random_playlist_name = "";
         
+        if (!completed_playlists.isEmpty()) {
         while (!completed_playlists.contains(random_playlist_name = playlist_names.get(random.nextInt(playlist_names.size())))) {
+            }
+        } else {
+            random_playlist_name = playlist_names.get(random.nextInt(playlist_names.size()));
         }
         
         completed_playlists.add(random_playlist_name);

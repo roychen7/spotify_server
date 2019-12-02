@@ -106,6 +106,7 @@ public class Token {
                 if (spotify_player_manager.getConnected() == 0) {
                     
                     spotify_player_manager.initPlayStatus();
+                    System.out.println("initiated spotify player manager play status!");
                     spotify_player_manager.setConnected(1);
                     
                     MainThread t1 = new MainThread(spotify_player_manager);

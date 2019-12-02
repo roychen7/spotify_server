@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,12 +35,15 @@ public class PlaylistGenerator {
     
     @GetMapping("/init_generator")
     public ResponseEntity initBiasedPlaylist() throws SQLException, IOException {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Access-Control-Allow-Origin", "http://localhost:3000");
+        
         List<Song> random_playlist_song_list = DatabaseAccesser.getRandomPlaylistSongs(spm.getCompletedPlaylists());
         WeightedRandomGenerator wrg = new WeightedRandomGenerator(random_playlist_song_list);
         List<String> ret_val = wrg.getBiasedTenSongs();
         
         spm.setPlaylistGeneratorStatus(PlaylistGenStatus.TRUE);
-        return new ResponseEntity(ret_val, HttpStatus.ACCEPTED);
+        return new ResponseEntity(ret_val, headers, HttpStatus.ACCEPTED);
     }
     
     @GetMapping("/resume_generator")

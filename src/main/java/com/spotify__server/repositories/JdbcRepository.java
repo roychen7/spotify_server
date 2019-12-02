@@ -39,9 +39,9 @@ public class JdbcRepository {
             String url = p.getProperty("spring.datasource.url");
             String username = p.getProperty("spring.datasource.username");
             String password = p.getProperty("spring.datasource.password");
-            config.setJdbcUrl("jdbc:mysql://localhost:3306/spotifyserver");
-            config.setUsername("root");
-            config.setPassword("omg1t5n0tm3");
+            config.setJdbcUrl(url);
+            config.setUsername(username);
+            config.setPassword(password);
             ds = new HikariDataSource(config);
         } catch (FileNotFoundException ex) {
             Logger.getLogger(JdbcRepository.class.getName()).log(Level.SEVERE, null, ex);

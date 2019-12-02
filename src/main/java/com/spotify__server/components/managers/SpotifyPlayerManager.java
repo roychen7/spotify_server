@@ -41,6 +41,10 @@ public class SpotifyPlayerManager {
     HashSet<String> completed_playlists;
     
     public void initPlayStatus() throws SQLException, IOException, ParseException {
+        pgs = PlaylistGenStatus.FALSE;
+        saved_list = new ArrayList<>();
+        completed_playlists = new HashSet<>();
+        System.out.println("inside init playstatus!");
         HttpGet get = new HttpGet("https://api.spotify.com/v1/me/player");
         get.addHeader("Authorization", "Bearer " + DatabaseAccesser.getAccessToken());
         HttpResponse response = HttpClients.createDefault().execute(get);
@@ -55,9 +59,6 @@ public class SpotifyPlayerManager {
         JSONObject obj = (JSONObject) parser.parse(str);
         
         play_status = (boolean) obj.get("is_playing");
-        pgs = PlaylistGenStatus.FALSE;
-        saved_list = new ArrayList<>();
-        completed_playlists = new HashSet<>();
     }
     
     public boolean getPlayStatus() {
