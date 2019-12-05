@@ -9,7 +9,12 @@ import java.util.concurrent.TimeUnit;
 
 import com.spotify__server.utils.SpotifyApiCaller;
 
-public class RefreshTokenInitializer implements Initializer {
+public class RefreshTokenInitializer implements Initializer, Runnable{
+
+    @Override
+    public void run() {
+        initialize();
+    }
 
     @Override
     public void initialize() {
@@ -32,5 +37,5 @@ public class RefreshTokenInitializer implements Initializer {
                 e.printStackTrace();
             }
         }
-    }   
+    }
 }

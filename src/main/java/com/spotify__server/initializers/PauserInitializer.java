@@ -7,7 +7,7 @@ import java.util.concurrent.TimeUnit;
 import com.spotify__server.components.SpotifyPlayer;
 import com.spotify__server.components.SpotifyPlayerState;
 
-public class PauserInitializer implements Initializer {
+public class PauserInitializer implements Initializer, Runnable {
 
     private int play_time = 0;
     private int pause_time = 0;
@@ -18,6 +18,11 @@ public class PauserInitializer implements Initializer {
 
     public PauserInitializer(SpotifyPlayerState sps, SpotifyPlayer spotify_player) {
         this.sps = sps;
+    }
+
+    @Override
+    public void run() {
+        initialize();
     }
 
     @Override
@@ -68,5 +73,4 @@ public class PauserInitializer implements Initializer {
             }
         }
     }
-
 }

@@ -44,14 +44,14 @@ public class JdbcRepository {
             config.setPassword(password);
             ds = new HikariDataSource(config);
         } catch (FileNotFoundException ex) {
-            Logger.getLogger(JdbcRepository.class.getName()).log(Level.SEVERE, null, ex);
+            ex.printStackTrace();
         } catch (IOException ex) {
-            Logger.getLogger(JdbcRepository.class.getName()).log(Level.SEVERE, null, ex);
+            ex.printStackTrace();
         } finally {
             try {
                 f.close();
             } catch (IOException ex) {
-                Logger.getLogger(JdbcRepository.class.getName()).log(Level.SEVERE, null, ex);
+                ex.printStackTrace();
             }
         }
     }
