@@ -7,7 +7,7 @@
 package com.spotify__server.controllers;
 
 import com.spotify__server.utils.HelperClass;
-import com.spotify__server.components.managers.SpotifyPlayerManager;
+import com.spotify__server.components.SpotifyPlayerState;
 import com.spotify__server.repositories.JdbcRepository;
 import com.spotify__server.database_access.DatabaseAccesser;
 import java.io.IOException;
@@ -48,10 +48,10 @@ import org.springframework.context.annotation.ComponentScan;
 // deals with the redirect uri while trying to authorize the spotify api
 @RestController
 @ComponentScan("com.spotify__server")
-public class Callback {
+public class CallbackController {
     
     @Autowired
-    private SpotifyPlayerManager spotify_player_manager;
+    private SpotifyPlayerState sps;
     
     // uses authorization code to request for access token, stores it in db once retrieved
     @RequestMapping("/callback") 
@@ -105,8 +105,8 @@ public class Callback {
         DatabaseAccesser.updateAccessToken();
         con.close();
         
-        synchronized(spotify_player_manager.test) {
-            spotify_player_manager.test.notifyAll();
+        synchronized(LoginController.class) {
+            sps.test.notifyAll();
             System.out.println("/callback notified thread");
         }
         

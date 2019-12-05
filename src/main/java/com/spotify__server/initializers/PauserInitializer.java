@@ -1,49 +1,30 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-package com.spotify__server.executable;
+package com.spotify__server.initializers;
+
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import com.spotify__server.components.SpotifyPlayerState;
-import java.io.IOException;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.HttpClients;
 
-/**
- *
- * @author roychen
- */
+public class PauserInitializer implements Initializer {
 
-// thread class responsible for initializing/scheduling time-scheduled tasks in the program
-public class MainThread implements Runnable {
-    
     private int play_time = 0;
     private int pause_time = 0;
     private boolean already_paused = false;
     private boolean supposed_to_pause;
-    private SpotifyPlayerState sps;            
-    
-    public MainThread(SpotifyPlayerState sps) {
-        System.out.println("main thread created!");
-        play_time = pause_time = 0;
-        already_paused = false;
+    private SpotifyPlayerState sps;  
+
+    public PauserInitializer(SpotifyPlayerState sps) {
         this.sps = sps;
     }
-     
-    public void run() {
-        System.out.println("running!");
-        Timer t = new Timer();
-        t.schedule(new Execute(), 0, 1000);
-        t.schedule(new Refresh(), 0, 3600000);
+
+    @Override
+    public void initialize() {
+        ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+        scheduler.schedule(new Execute(), 1, TimeUnit.SECONDS);
     }
-    
-    class Execute extends TimerTask {
+
+    class Execute implements Runnable {
 
         @Override
         public void run() {
@@ -83,18 +64,5 @@ public class MainThread implements Runnable {
             }
         }
     }
-    
-    class Refresh extends TimerTask {
-        
-        public void run() {
-        HttpGet get = new HttpGet("http://localhost:8080/refresh");
-        HttpClient client = HttpClients.createDefault();
-        
-        try {
-            client.execute(get);
-        } catch (IOException ex) {
-            Logger.getLogger(MainThread.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-    }   
+
 }

@@ -5,14 +5,17 @@
  */
 package com.spotify__server.controllers;
 
-import com.spotify__server.components.managers.SpotifyPlayerManager;
+import com.spotify__server.components.SpotifyPlayerState;
 import com.spotify__server.database_access.DatabaseAccesser;
 import com.spotify__server.enums.PlaylistGenStatus;
 import com.spotify__server.modules.Song;
 import com.spotify__server.utils.WeightedRandomGenerator;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Queue;
+import javafx.util.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -27,30 +30,46 @@ import org.springframework.web.bind.annotation.RestController;
  */
 
 @RestController
-public class PlaylistGenerator {
+public class PlaylistGeneratorController {
     private int i = 0;
     
     @Autowired
-    private SpotifyPlayerManager spm;
+    private SpotifyPlayerState sps;
     
     @GetMapping("/init_generator")
     public ResponseEntity initBiasedPlaylist() throws SQLException, IOException {
+        
         HttpHeaders headers = new HttpHeaders();
         headers.set("Access-Control-Allow-Origin", "http://localhost:3000");
         
-        List<Song> random_playlist_song_list = DatabaseAccesser.getRandomPlaylistSongs(spm.getCompletedPlaylists());
+        List<Song> random_playlist_song_list = DatabaseAccesser.getRandomPlaylistSongs(sps.getCompletedPlaylists());
         WeightedRandomGenerator wrg = new WeightedRandomGenerator(random_playlist_song_list);
-        List<String> ret_val = wrg.getBiasedTenSongs();
+        Queue<Song> play_queue = wrg.getBiasedTenSongs();
         
-        spm.setPlaylistGeneratorStatus(PlaylistGenStatus.TRUE);
-        return new ResponseEntity(ret_val, headers, HttpStatus.ACCEPTED);
+        sps.setPlayQueue(play_queue);
+//        
+//        PlaylistGenerator pg = new PlaylistGenerator(sps);
+//        pg.initPlaying();
+        
+        
+        sps.setPlaylistGeneratorStatus(PlaylistGenStatus.TRUE);
+        
+        List<Pair<String, String>> ret_temp = new ArrayList<>();
+        
+        for (int i = 0; i < play_queue.size(); i++) {
+            Song s = play_queue.poll();
+            Pair p1 = new Pair(s.getName(), s.getPlaylistName());
+            ret_temp.add(p1);
+        }
+        
+        return new ResponseEntity(ret_temp, headers, HttpStatus.ACCEPTED);
+        
     }
     
     @GetMapping("/resume_generator")
     public ResponseEntity resumeBiasedPlaylists() {
         
-        List<String> saved_list = spm.getSavedList();
-        spm.setPlaylistGeneratorStatus(PlaylistGenStatus.TRUE);
+        sps.setPlaylistGeneratorStatus(PlaylistGenStatus.TRUE);
         return new ResponseEntity(Integer.toString(i), HttpStatus.ACCEPTED);
     }
     
@@ -58,7 +77,7 @@ public class PlaylistGenerator {
     public ResponseEntity saveCurrentGeneratorSongs() {
         
         
-        spm.setPlaylistGeneratorStatus(PlaylistGenStatus.PAUSED);
+        sps.setPlaylistGeneratorStatus(PlaylistGenStatus.PAUSED);
         return new ResponseEntity(Integer.toString(i), HttpStatus.ACCEPTED);
     }
 }

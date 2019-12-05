@@ -10,16 +10,18 @@ package com.spotify__server.modules;
  * @author roychen
  */
 public class Song {
-    private String associated_playlist_id;
+    private String playlist_id;
+    private String playlist_name;
     private String name;
     private String uri;
     private int duration_ms;
     private int playcount;
     private int weight;
     
-    public Song(String uri, int playcount) {
+    public Song(String uri, int playcount, String song_name,String playlist_name) {
         this.uri = uri;
         this.playcount = playcount;
+        this.playlist_name = playlist_name;
         
         calculateWeight(playcount);
     }
@@ -40,5 +42,17 @@ public class Song {
     
     public String getUri() {
         return this.uri;
+    }
+    
+    public int getDuration() {
+        return duration_ms;
+    }
+    
+    public String getName() {
+        return name;
+    }
+    
+    public String getPlaylistName() {
+        return playlist_name;
     }
 }

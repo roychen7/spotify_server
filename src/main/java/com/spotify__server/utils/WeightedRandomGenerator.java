@@ -6,11 +6,12 @@
 package com.spotify__server.utils;
 
 import com.spotify__server.modules.Song;
-import static java.lang.Math.E;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.NavigableMap;
+import java.util.Queue;
 import java.util.Random;
 import java.util.TreeMap;
 
@@ -19,11 +20,6 @@ import java.util.TreeMap;
  * @author roychen
  */
 public class WeightedRandomGenerator {
-
-    public static List<Song> returnTen(List<Song> random_playlist_song_list) {
-        
-        return new ArrayList<>();
-    }
     
     private NavigableMap<Integer, Song> map = new TreeMap<Integer, Song>();
     private Random random;
@@ -39,19 +35,18 @@ public class WeightedRandomGenerator {
         }
     }
     
-    public List<String> getBiasedTenSongs() {
-        List<String> ret_string = new ArrayList<>();
+    public Queue<Song> getBiasedTenSongs() {
+        Queue<Song> ret_queue = new LinkedList<>();
         
         for (int i = 0; i < 10; i++) {
-            ret_string.add(getNext());
+            ret_queue.add(getNext());
         }
-        return ret_string;
+        return ret_queue;
     }
 
-    private String getNext() {
+    private Song getNext() {
         int random_int = random.nextInt(total);
         Entry ret = map.higherEntry(random_int);
-        Song song = (Song) ret.getValue();
-        return song.getUri();
+        return (Song) ret.getValue();
     }
 }

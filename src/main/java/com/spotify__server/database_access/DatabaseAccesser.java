@@ -7,6 +7,8 @@ package com.spotify__server.database_access;
 
 import com.spotify__server.modules.Song;
 import com.spotify__server.repositories.JdbcRepository;
+
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -26,19 +28,19 @@ import org.springframework.cache.annotation.Cacheable;
  * @author roychen
  */
 public class DatabaseAccesser {
-    
+
     @Cacheable(cacheNames = "getToken")
-    public static String getAccessToken()  {
+    public static String getAccessToken() {
         System.out.println("not cached!");
-            
+
         try (Connection con = JdbcRepository.getConnection()) {
-        Statement stmt = con.createStatement();
-        ResultSet rs = stmt.executeQuery("select `access_token` from `token`");
-        
-        if (rs.next()) {
-            return rs.getString(1);
-        }
-        
+            Statement stmt = con.createStatement();
+            ResultSet rs = stmt.executeQuery("select `access_token` from `token`");
+
+            if (rs.next()) {
+                return rs.getString(1);
+            }
+
         } catch (IOException ex) {
             Logger.getLogger(DatabaseAccesser.class.getName()).log(Level.SEVERE, null, ex);
         } catch (SQLException ex) {
@@ -46,35 +48,44 @@ public class DatabaseAccesser {
         }
         return "";
     }
-    
+
     @CachePut(cacheNames = "getToken")
-    public static String updateAccessToken()  {
+    public static String updateAccessToken() {
         System.out.println("not cached!");
-            
+
         try (Connection con = JdbcRepository.getConnection()) {
-        Statement stmt = con.createStatement();
-        ResultSet rs = stmt.executeQuery("select `access_token` from `token`");
-        
-        if (rs.next()) {
-            return rs.getString(1);
-        }
-        
+            Statement stmt = con.createStatement();
+            ResultSet rs = stmt.executeQuery("select `access_token` from `token`");
+
+            if (rs.next()) {
+                return rs.getString(1);
+            }
+            return "";
+
         } catch (IOException ex) {
             Logger.getLogger(DatabaseAccesser.class.getName()).log(Level.SEVERE, null, ex);
+            return "";
         } catch (SQLException ex) {
             Logger.getLogger(DatabaseAccesser.class.getName()).log(Level.SEVERE, null, ex);
+            return "";
         }
-        return "";
     }
-    
-    public static void insertIntoDb(String query) throws SQLException, IOException {
+
+    public static boolean insertIntoDb(String query) {
         try (Connection con = JdbcRepository.getConnection()) {
             Statement stmt = con.createStatement();
             stmt.executeUpdate(query);
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
         }
     }
     
-    public static String getSingleFromDb(String query) throws SQLException, IOException {
+    public static String getSingleFromDb(String query) {
         try (Connection con = JdbcRepository.getConnection()) {
             Statement stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery(query);
@@ -82,59 +93,83 @@ public class DatabaseAccesser {
                 return rs.getString(1);
             } 
             return "";
+        } catch (IOException e) {
+            e.printStackTrace();
+            return "";
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "";
         }
     }
     
-    public static List<String> getListFromDb(int no_columns, String query) throws SQLException, IOException {
+    public static List<String> getListFromDb(int no_columns, String query) {
+        List<String> ret = new ArrayList<>();
         try (Connection con = JdbcRepository.getConnection()) {
             Statement stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery(query);
-            
-            List<String> ret = new ArrayList<>();
+
             while (rs.next()) {
                 for (int i = 1; i < no_columns + 1; i++) {
                     ret.add(rs.getString(i));
                 }
             }
             return ret;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return ret;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return ret;
         }
     }
     
     @Cacheable(cacheNames="getExistingSongs")
-    public static HashSet<String> getExistingSongs() throws SQLException, IOException {
+    public static HashSet<String> getExistingSongs() {
         System.out.println("DAtabaseAccesser::getExistingSongs");
+        HashSet<String> result = new HashSet<>();
         try (Connection con = JdbcRepository.getConnection()) {
             Statement stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery("select `song_id` from `songs`");
-            HashSet<String> result = new HashSet<>();
             while (rs.next()) {
                 result.add(rs.getString(1));
             }
+            return result;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return result;
+        } catch (SQLException e) {
+            e.printStackTrace();
             return result;
         }
     }
     
     @Cacheable(cacheNames="getExistingSongs")
-    public static HashSet<String> updateExistingSongs() throws SQLException, IOException {
+    public static HashSet<String> updateExistingSongs() {
         System.out.println("DAtabaseAccesser::updateExistingSongs");
+        HashSet<String> result = new HashSet<>();
         try (Connection con = JdbcRepository.getConnection()) {
             Statement stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery("select `song_id` from `songs`");
-            HashSet<String> result = new HashSet<>();
             while (rs.next()) {
                 result.add(rs.getString(1));
             }
+            return result;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return result;
+        } catch (SQLException e) {
+            e.printStackTrace();
             return result;
         }
     }
     
     @Cacheable(cacheNames="playlistNames")
-    public static List<String> getPlaylistNames() throws SQLException, IOException {
+    public static List<String> getPlaylistNames() {
         return getListFromDb(1, "select `playlist_name` from `playlists`");
     }
     
     @CachePut(cacheNames="playlistNames")
-    public static List<String> updatePlaylistNames() throws SQLException, IOException {
+    public static List<String> updatePlaylistNames() {
         return getListFromDb(1, "select `playlist_name` from `playlists`");
     }
 
@@ -159,13 +194,11 @@ public class DatabaseAccesser {
        
         List<Song> ret_songs = new ArrayList<>();
         
-        for (int i = 0; i < ret_string_format.size(); i = i + 2) {
-            Song s = new Song(ret_string_format.get(i), Integer.parseInt(ret_string_format.get(i + 1)));
+        for (int i = 0; i < ret_string_format.size(); i = i + 4) {
+            Song s = new Song(ret_string_format.get(i), Integer.parseInt(ret_string_format.get(i + 1), ret_string_format.get(i+2), ret_string_format.get(i+3)));
             ret_songs.add(s);
         }
         
         return ret_songs;
     }
-    
-    
 }

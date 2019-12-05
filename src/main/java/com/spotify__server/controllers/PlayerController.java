@@ -5,7 +5,7 @@
  */
 package com.spotify__server.controllers;
 
-import com.spotify__server.components.managers.SpotifyPlayerManager;
+import com.spotify__server.components.SpotifyPlayerState;
 import com.spotify__server.database_access.DatabaseAccesser;
 import java.io.IOException;
 import org.apache.http.HttpResponse;
@@ -26,10 +26,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 // this class is meant for dealing with functionalities regarding playing/pausing/skipping songs
 @RestController
-public class Player {
+public class PlayerController {
     
     @Autowired
-    private SpotifyPlayerManager spotify_player_manager;
+    private SpotifyPlayerState sps;
         
     // mapping for pausing current song
     @GetMapping("/pause")
@@ -46,7 +46,7 @@ public class Player {
             
             HttpResponse response = client.execute(put);
             
-            spotify_player_manager.setPlayStatus(false);
+            sps.setPlayStatus(false);
             return new ResponseEntity<>(response, headers, HttpStatus.ACCEPTED);
         } catch (IOException ex) {
             return new ResponseEntity<>(ex.getMessage(), headers, HttpStatus.NOT_FOUND);
@@ -62,13 +62,13 @@ public class Player {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Access-Control-Allow-Origin", "http://localhost:3000");
         
-        spotify_player_manager.setPlayStatus(false);
+        sps.setPlayStatus(false);
         return new ResponseEntity<>("", headers, HttpStatus.ACCEPTED);
     }
     
     @GetMapping("/playstatus") 
     public ResponseEntity getPlayStatus() {
-        return new ResponseEntity<>(Boolean.toString(spotify_player_manager.getPlayStatus()), HttpStatus.ACCEPTED);
+        return new ResponseEntity<>(Boolean.toString(sps.getPlayStatus()), HttpStatus.ACCEPTED);
     }
     
     // mapping for playing current song
@@ -86,7 +86,7 @@ public class Player {
             
             HttpResponse response = client.execute(put);
             
-            spotify_player_manager.setPlayStatus(true);
+            sps.setPlayStatus(true);
             return new ResponseEntity<>(response, headers, HttpStatus.ACCEPTED);
         } catch (IOException ex) {
             return new ResponseEntity<>(ex.getMessage(), headers, HttpStatus.NOT_FOUND);
@@ -100,7 +100,7 @@ public class Player {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Access-Control-Allow-Origin", "http://localhost:3000");
         
-        spotify_player_manager.setPlayStatus(true);
+        sps.setPlayStatus(true);
         return new ResponseEntity<>("", headers, HttpStatus.ACCEPTED);
     }
 }
