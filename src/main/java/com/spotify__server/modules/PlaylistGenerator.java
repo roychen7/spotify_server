@@ -5,7 +5,7 @@
  */
 package com.spotify__server.modules;
 
-import com.spotify__server.components.SpotifyPlayerState;
+import com.spotify__server.components.SpotifyPlayer;
 import java.io.IOException;
 import java.util.Queue;
 import java.util.Timer;
@@ -18,12 +18,12 @@ import java.util.TimerTask;
 public class PlaylistGenerator {
     private Queue<Song> play_queue;
     private Timer timer;
-    private SpotifyPlayerState sps;
+    private SpotifyPlayer spotify_player;
     private TimerTask timer_task;
     
-    public PlaylistGenerator(SpotifyPlayerState sps) {
+    public PlaylistGenerator(SpotifyPlayer spotify_player) {
         this.play_queue = play_queue;
-        this.sps = sps;
+        this.spotify_player = spotify_player;
         timer = new Timer();
         timer_task = new TimerTask() {
             public void run() {
@@ -38,7 +38,7 @@ public class PlaylistGenerator {
     
     public void initPlaying() throws IOException {
         Song s = play_queue.poll();
-        sps.playSong(s.getUri());
+        spotify_player.playSong(s.getUri());
         
         timer.schedule(timer_task, s.getDuration());
     }

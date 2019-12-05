@@ -106,7 +106,7 @@ public class CallbackController {
         con.close();
         
         synchronized(LoginController.class) {
-            sps.test.notifyAll();
+            LoginController.class.notifyAll();
             System.out.println("/callback notified thread");
         }
         

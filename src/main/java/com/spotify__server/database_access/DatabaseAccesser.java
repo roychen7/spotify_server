@@ -8,7 +8,6 @@ package com.spotify__server.database_access;
 import com.spotify__server.modules.Song;
 import com.spotify__server.repositories.JdbcRepository;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -195,7 +194,7 @@ public class DatabaseAccesser {
         List<Song> ret_songs = new ArrayList<>();
         
         for (int i = 0; i < ret_string_format.size(); i = i + 4) {
-            Song s = new Song(ret_string_format.get(i), Integer.parseInt(ret_string_format.get(i + 1), ret_string_format.get(i+2), ret_string_format.get(i+3)));
+            Song s = new Song(ret_string_format.get(i), Integer.parseInt(ret_string_format.get(i + 1)), ret_string_format.get(i+2), ret_string_format.get(i+3));
             ret_songs.add(s);
         }
         

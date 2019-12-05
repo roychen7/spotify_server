@@ -14,9 +14,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import com.spotify__server.utils.HelperClass;
+import com.spotify__server.components.SpotifyPlayer;
 import com.spotify__server.components.SpotifyPlayerState;
 import com.spotify__server.database_access.DatabaseAccesser;
-import com.spotify__server.executable.MainThread;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.minidev.json.parser.ParseException;
@@ -38,6 +38,9 @@ public class LoginController {
     private SpotifyPlayerState sps;  
 
     @Autowired
+    private SpotifyPlayer spotify_player;
+
+    @Autowired
     private InitializeAll initializer;
     
     // thread sleeps until awoken, and checks if token in db is valid, returns code 2xx if it is, if invalid, then sleeps again and repeats process
@@ -52,12 +55,12 @@ public class LoginController {
             try {
                 while (Integer.toString(responseCode = HelperClass.verifyToken(DatabaseAccesser.getAccessToken())).charAt(0) != "2".charAt(0)) {
                     System.out.println("/login right before waiting");
-                    sps.test.wait();
+                    LoginController.class.wait();
                     System.out.println("/login awoke from waiting");
                 }
                 
                 if (sps.getConnected() == 0) {
-                    
+                    initializer.initInitializer(sps, spotify_player);
                     initializer.initialize();
                     System.out.println("initiated spotify player manager play status!");
                     sps.setConnected(1); 

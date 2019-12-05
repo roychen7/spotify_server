@@ -115,13 +115,15 @@ public class SpotifyApiCaller {
 
             if (!existing_song_ids.contains(song_id)) {
                 if ((ind_of_quote = song_name.indexOf("'")) == -1) {
-                    insert_string = "insert into `songs` values ('" + playlist_id + "', '" + song_id + "', '" + song_uri
-                            + "', '" + song_name + "', '" + song_duration + "', '0')";
+                    insert_string = "insert ignore into `songs` set `playlist_id`='" + playlist_id + 
+                    "', `song_id`='" + song_id + "', `song_name`='" + song_name + 
+                    "', `song_duration`='" + song_duration + "'";
                 } else {
                     String song_name_reformatted = handleQuotation(song_name, ind_of_quote);
 
-                    insert_string = "insert into `songs` values ('" + playlist_id + "', '" + song_id + "', '" + song_uri
-                            + "', '" + song_name_reformatted + "', '" + song_duration + "', '0')";
+                    insert_string = "insert ignore into `songs` set `playlist_id`='" + playlist_id + 
+                    "', `song_id`='" + song_id + "', `song_name`='" + song_name_reformatted + 
+                    "', `song_duration`='" + song_duration + "'";
                 }
             }
 

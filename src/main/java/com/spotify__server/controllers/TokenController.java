@@ -6,6 +6,7 @@
 package com.spotify__server.controllers;
 
 import com.spotify__server.utils.HelperClass;
+import com.spotify__server.components.SpotifyPlayer;
 import com.spotify__server.components.SpotifyPlayerState;
 import com.spotify__server.repositories.JdbcRepository;
 import com.spotify__server.database_access.DatabaseAccesser;
@@ -38,6 +39,9 @@ public class TokenController {
     
     @Autowired
     private SpotifyPlayerState sps;
+
+    @Autowired
+    private SpotifyPlayer spotify_player;
 
     @Autowired
     private InitializeAll initializer;
@@ -89,6 +93,7 @@ public class TokenController {
             if (Integer.toString(code).charAt(0) == "2".charAt(0)) {
                 if (sps.getConnected() == 0) {
                     
+                    initializer.initInitializer(sps, spotify_player);
                     initializer.initialize();
                     System.out.println("initiated spotify player manager play status!");
                     sps.setConnected(1); 
