@@ -7,42 +7,26 @@ package com.spotify__server.modules;
 
 import com.spotify__server.components.SpotifyPlayer;
 import com.spotify__server.components.SpotifyPlayerState;
+import com.spotify__server.modules.Song;
 
 import java.io.IOException;
 import java.util.Queue;
-import java.util.Timer;
-import java.util.TimerTask;
 
 /**
  *
  * @author roychen
  */
 public class PlaylistGenerator {
-    private Queue<Song> play_queue;
-    private Timer timer;
     private SpotifyPlayer spotify_player;
     private SpotifyPlayerState sps;
-    private TimerTask timer_task;
     
     public PlaylistGenerator(SpotifyPlayer spotify_player, SpotifyPlayerState sps) {
         this.sps = sps;
         this.spotify_player = spotify_player;
-        timer = new Timer();
-        timer_task = new TimerTask() {
-            public void run() {
-                try {
-                    initPlaying();
-                } catch (IOException ex) {
-                    System.out.println("Failed to play song");
-                }
-            }
-        };
     }
     
     public void initPlaying() throws IOException {
-        Song s = play_queue.poll();
-        spotify_player.playSong(s.getUri());
-        
-        timer.schedule(timer_task, s.getDuration());
+        Queue<Song> songs = sps.getPlayQueue();
+        spotify_player.playSongs(songs);
     }
 }

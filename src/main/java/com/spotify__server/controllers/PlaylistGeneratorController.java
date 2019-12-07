@@ -5,17 +5,27 @@
  */
 package com.spotify__server.controllers;
 
+import com.spotify__server.components.SpotifyPlayer;
 import com.spotify__server.components.SpotifyPlayerState;
 import com.spotify__server.components.accessers.database_access.DatabaseAccesser;
 import com.spotify__server.enums.PlaylistGenStatus;
+import com.spotify__server.modules.PlaylistGenerator;
 import com.spotify__server.modules.Song;
 import com.spotify__server.utils.WeightedRandomGenerator;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
 import javafx.util.Pair;
+import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.HttpClients;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -34,6 +44,9 @@ public class PlaylistGeneratorController {
     private int i = 0;
     
     @Autowired
+    private SpotifyPlayer spotify_player;
+
+    @Autowired
     private SpotifyPlayerState sps;
 
     @Autowired
@@ -50,22 +63,40 @@ public class PlaylistGeneratorController {
         Queue<Song> play_queue = wrg.getBiasedTenSongs();
         
         sps.setPlayQueue(play_queue);
-//        
-//        PlaylistGenerator pg = new PlaylistGenerator(sps);
-//        pg.initPlaying();
+        
+       PlaylistGenerator pg = new PlaylistGenerator(spotify_player, sps);
+       pg.initPlaying();
         
         
         sps.setPlaylistGeneratorStatus(PlaylistGenStatus.TRUE);
         
-        List<String> ret_temp = new ArrayList<>();
-
-        for (int i = 0; i < 10; i++) {
-            Song s = play_queue.poll();
-            ret_temp.add(s.getName());
-        }
+        return new ResponseEntity("", headers, HttpStatus.ACCEPTED);
         
-        return new ResponseEntity(ret_temp, headers, HttpStatus.ACCEPTED);
+    }
+    
+    @GetMapping("/testplaygenerator")
+    public ResponseEntity testPlayGenerator() throws UnsupportedEncodingException, IOException {
+        HttpPut put = new HttpPut("https://api.spotify.com/v1/me/player/play");
+        HttpClient client = HttpClients.createDefault();
         
+        JSONObject obj = new JSONObject();
+        
+        JSONArray arr = new JSONArray();
+        arr.add("spotify:track:7zxRMhXxJMQCeDDg0rKAVo");
+        
+        obj.appendField("uris", arr);
+        
+        String bodyString = obj.toString();
+        System.out.println(bodyString);
+        StringEntity entityString = new StringEntity(bodyString);
+        
+        put.setEntity(entityString);
+        put.setHeader("Content-type", "application/json");
+        put.setHeader("Authorization", "Bearer " + database_accesser.getAccessToken());
+        
+        HttpResponse response = client.execute(put);
+        
+        return new ResponseEntity<>(response, HttpStatus.ACCEPTED);
     }
     
     @GetMapping("/resume_generator")

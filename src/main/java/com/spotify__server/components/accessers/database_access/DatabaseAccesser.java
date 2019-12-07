@@ -31,48 +31,7 @@ import java.util.logging.Logger;
 @Component
 public class DatabaseAccesser {
 
-    @Cacheable(cacheNames = "getToken")
-    public String getAccessToken() {
-        System.out.println("not cached!");
-
-        try (Connection con = JdbcRepository.getConnection()) {
-            Statement stmt = con.createStatement();
-            ResultSet rs = stmt.executeQuery("select `access_token` from `token`");
-
-            if (rs.next()) {
-                return rs.getString(1);
-            }
-
-        } catch (IOException ex) {
-            Logger.getLogger(DatabaseAccesser.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SQLException ex) {
-            Logger.getLogger(DatabaseAccesser.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return "";
-    }
-
-    @CachePut(cacheNames = "getToken")
-    public String updateAccessToken() {
-        System.out.println("not cached!");
-
-        try (Connection con = JdbcRepository.getConnection()) {
-            Statement stmt = con.createStatement();
-            ResultSet rs = stmt.executeQuery("select `access_token` from `token`");
-
-            if (rs.next()) {
-                return rs.getString(1);
-            }
-            return "";
-
-        } catch (IOException ex) {
-            Logger.getLogger(DatabaseAccesser.class.getName()).log(Level.SEVERE, null, ex);
-            return "";
-        } catch (SQLException ex) {
-            Logger.getLogger(DatabaseAccesser.class.getName()).log(Level.SEVERE, null, ex);
-            return "";
-        }
-    }
-
+    // below are generic functions that shouldn't have results cached
     public boolean insertIntoDb(String query) {
         try (Connection con = JdbcRepository.getConnection()) {
             Statement stmt = con.createStatement();
@@ -125,46 +84,6 @@ public class DatabaseAccesser {
         }
     }
     
-    @Cacheable(cacheNames="getExistingSongs")
-    public HashSet<String> getExistingSongs() {
-        System.out.println("DAtabaseAccesser::getExistingSongs");
-        HashSet<String> result = new HashSet<>();
-        try (Connection con = JdbcRepository.getConnection()) {
-            Statement stmt = con.createStatement();
-            ResultSet rs = stmt.executeQuery("select `song_id` from `songs`");
-            while (rs.next()) {
-                result.add(rs.getString(1));
-            }
-            return result;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return result;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return result;
-        }
-    }
-    
-    @Cacheable(cacheNames="getExistingSongs")
-    public HashSet<String> updateExistingSongs() {
-        System.out.println("DAtabaseAccesser::updateExistingSongs");
-        HashSet<String> result = new HashSet<>();
-        try (Connection con = JdbcRepository.getConnection()) {
-            Statement stmt = con.createStatement();
-            ResultSet rs = stmt.executeQuery("select `song_id` from `songs`");
-            while (rs.next()) {
-                result.add(rs.getString(1));
-            }
-            return result;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return result;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return result;
-        }
-    }
-    
     @Cacheable(cacheNames="playlistNames")
     public List<String> getPlaylistIds() {
         return getListFromDb(1, "select `playlist_id` from `playlists`");
@@ -175,6 +94,7 @@ public class DatabaseAccesser {
         return getListFromDb(1, "select `playlist_id` from `playlists`");
     }
 
+    // below are generic functions that don't need to be cached
     public List<Song> getRandomPlaylistSongs(HashSet<String> completed_playlists) throws SQLException, IOException {
         List<String> playlist_ids = getPlaylistIds();
         Random random = new Random();
@@ -202,5 +122,48 @@ public class DatabaseAccesser {
         }
         
         return ret_songs;
+    }
+
+
+    @Cacheable(cacheNames = "getToken")
+    public String getAccessToken() {
+        System.out.println("not cached!");
+
+        try (Connection con = JdbcRepository.getConnection()) {
+            Statement stmt = con.createStatement();
+            ResultSet rs = stmt.executeQuery("select `access_token` from `token`");
+
+            if (rs.next()) {
+                return rs.getString(1);
+            }
+
+        } catch (IOException ex) {
+            Logger.getLogger(DatabaseAccesser.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException ex) {
+            Logger.getLogger(DatabaseAccesser.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return "";
+    }
+
+    @CachePut(cacheNames = "getToken")
+    public String updateAccessToken() {
+        System.out.println("not cached!");
+
+        try (Connection con = JdbcRepository.getConnection()) {
+            Statement stmt = con.createStatement();
+            ResultSet rs = stmt.executeQuery("select `access_token` from `token`");
+
+            if (rs.next()) {
+                return rs.getString(1);
+            }
+            return "";
+
+        } catch (IOException ex) {
+            Logger.getLogger(DatabaseAccesser.class.getName()).log(Level.SEVERE, null, ex);
+            return "";
+        } catch (SQLException ex) {
+            Logger.getLogger(DatabaseAccesser.class.getName()).log(Level.SEVERE, null, ex);
+            return "";
+        }
     }
 }

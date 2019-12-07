@@ -55,7 +55,7 @@ public class PlaylistAndSongInitializer implements Runnable, Initializer {
             throws ClientProtocolException, IOException, ParseException {
         for (int i = 0; i < list_playlist_ids_names.size(); i++) {
             System.out.println("INITIALIZING CURRENT PLAYLIST EQUALS = " + i);
-            api_accesser.updatePlaylistSongs(list_playlist_ids_names.get(i).getKey(), 0);
+            api_accesser.updatePlaylistSongsIntoDbFromApi(list_playlist_ids_names.get(i).getKey(), 0);
         }
     }
 }

@@ -3,8 +3,11 @@ package com.spotify__server.components;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import com.spotify__server.components.accessers.spotify_api_access.SpotifyApiAccesser;
+import com.spotify__server.modules.Song;
 
 import java.io.IOException;
+import java.util.Queue;
+
 import org.apache.http.client.ClientProtocolException;
 // responsible for managing active spotify playback properties (eg. song, volume, etc.) and state
 @Component
@@ -34,12 +37,11 @@ public class SpotifyPlayer {
         }       
     }
 
-    public void playSong(String song_uri) {
+    public void playSongs(Queue<Song> songs) {
         try {
-            api_accesser.playSong(song_uri);
+            api_accesser.playSongs(songs);
             sps.setPlayStatus(true);
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }

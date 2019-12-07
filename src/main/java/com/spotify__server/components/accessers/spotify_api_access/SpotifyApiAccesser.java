@@ -2,7 +2,7 @@ package com.spotify__server.components.accessers.spotify_api_access;
 
 // package dependencies
 import com.spotify__server.components.accessers.database_access.DatabaseAccesser;
-import com.spotify__server.components.accessers.spotify_api_access.SpotifyApiAccesser;
+import com.spotify__server.modules.Song;
 import com.spotify__server.utils.HelperClass;
 
 import net.minidev.json.parser.JSONParser;
@@ -20,6 +20,7 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -27,6 +28,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Queue;
+
 import javafx.util.Pair;
 import java.util.HashSet;
 
@@ -88,7 +91,7 @@ public class SpotifyApiAccesser {
         return ret_list;
     }
 
-    public void updatePlaylistSongs(String playlist_id, int noOfResets)
+    public void updatePlaylistSongsIntoDbFromApi(String playlist_id, int noOfResets)
             throws ClientProtocolException, IOException, ParseException {
         HttpGet get = new HttpGet("https://api.spotify.com/v1/playlists/" + playlist_id
                 + "/tracks?fields=items(added_at%2Ctrack(name%2Cid%2Cduration_ms%2Calbum%2Cartists%2Curi))");
@@ -100,8 +103,6 @@ public class SpotifyApiAccesser {
         JSONParser parser = new JSONParser();
         JSONObject obj = (JSONObject) parser.parse(response_string);
         JSONArray items_array = (JSONArray) obj.get("items");
-
-        HashSet<String> existing_song_ids = database_accesser.getExistingSongs();
 
         for (int i = 0; i < items_array.size(); i++) {
             JSONObject ith_track = (JSONObject) items_array.get(i);
@@ -117,18 +118,15 @@ public class SpotifyApiAccesser {
             // handle (eg. handleQuotation())
             int ind_of_quote = -1;
 
-            if (!existing_song_ids.contains(song_id)) {
                 if ((ind_of_quote = song_name.indexOf("'")) == -1) {
                     insert_string = "insert ignore into `songs` set `playlist_id`='" + playlist_id + "', `song_id`='"
-                            + song_id + "', `song_name`='" + song_name + "', `song_duration`='" + song_duration + "'";
+                            + song_id + "', `song_uri`='" + song_uri + "', `song_name`='" + song_name + "', `song_duration`='" + song_duration + "'";
                 } else {
                     String song_name_reformatted = handleQuotation(song_name, ind_of_quote);
-
                     insert_string = "insert ignore into `songs` set `playlist_id`='" + playlist_id + "', `song_id`='"
-                            + song_id + "', `song_name`='" + song_name_reformatted + "', `song_duration`='"
+                            + song_id + "', `song_uri`='" + song_uri + "', `song_name`='" + song_name_reformatted + "', `song_duration`='"
                             + song_duration + "'";
                 }
-            }
 
             if (!insert_string.equals("")) {
                 database_accesser.insertIntoDb(insert_string);
@@ -204,14 +202,24 @@ public class SpotifyApiAccesser {
         client.execute(put);
     }
 
-    public void playSong(String song_uri) throws ClientProtocolException, IOException {
+    public void playSongs(Queue<Song> songs) throws ClientProtocolException, IOException {
         HttpPut put = new HttpPut("https://api.spotify.com/v1/me/player/play");
         put.addHeader("Authorization", "Bearer " + database_accesser.getAccessToken());
+        put.addHeader("Content-type", "application/json");
+
+        JSONObject obj = new JSONObject();
+        JSONArray arr = new JSONArray();
         
-        List<NameValuePair> params = new ArrayList<>();
-        params.add(new BasicNameValuePair("context_uri", song_uri));
+        while (!songs.isEmpty()) {
+            arr.add(songs.poll().getUri());
+        }
         
-        put.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
+        obj.appendField("uris", arr);
+
+        String body_string = obj.toString();
+        StringEntity entity_body_string = new StringEntity(body_string);
+
+        put.setEntity(entity_body_string);
         client.execute(put);
     }
 
