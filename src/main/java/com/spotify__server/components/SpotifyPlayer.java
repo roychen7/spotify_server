@@ -2,69 +2,45 @@ package com.spotify__server.components;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import com.spotify__server.database_access.DatabaseAccesser;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.message.BasicNameValuePair;
+import com.spotify__server.components.accessers.spotify_api_access.SpotifyApiAccesser;
 
+import java.io.IOException;
+import org.apache.http.client.ClientProtocolException;
 // responsible for managing active spotify playback properties (eg. song, volume, etc.) and state
 @Component
 public class SpotifyPlayer {
 
     @Autowired
     private SpotifyPlayerState sps;
+    
+    @Autowired
+    private SpotifyApiAccesser api_accesser;
 
     public void togglePlayback(boolean b) {
-        HttpClient client = HttpClients.createDefault();
-        HttpPut put;
-
-        if (b == true) {
-            put = new HttpPut("https://api.spotify.com/v1/me/player/play");
-        } else {
-            put = new HttpPut("https://api.spotify.com/v1/me/player/pause");
-        }
-
         try {
-            String access_token = DatabaseAccesser.getAccessToken();
-            put.addHeader("Authorization", "Bearer " + access_token);
-
-            client.execute(put);
-
             if (b == true) {
+                api_accesser.togglePlay();
                 sps.setPlayStatus(true);
-            } else {
-                sps.setPlayStatus(false);
+                return;
             }
 
-        } catch (IOException ex) {
-            Logger.getLogger(SpotifyPlayerState.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            api_accesser.togglePause();
+            sps.setPlayStatus(false);
+            
+            } catch (ClientProtocolException ce) {
+                ce.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+        }       
     }
 
-    public boolean playSong(String song_uri) {
+    public void playSong(String song_uri) {
         try {
-            HttpClient client = HttpClients.createDefault();
-            HttpPut put = new HttpPut("https://api.spotify.com/v1/me/player/play");
-            
-            put.addHeader("Authorization", "Bearer " + DatabaseAccesser.getAccessToken());
-            
-            List<NameValuePair> params = new ArrayList<>();
-            params.add(new BasicNameValuePair("context_uri", song_uri));
-            
-            put.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
-            
-            client.execute(put);
-            return true;
-        } catch (IOException ex) {
-            return false;
+            api_accesser.playSong(song_uri);
+            sps.setPlayStatus(true);
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
     }
 }

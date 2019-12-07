@@ -18,6 +18,7 @@ public class PauserInitializer implements Initializer, Runnable {
 
     public PauserInitializer(SpotifyPlayerState sps, SpotifyPlayer spotify_player) {
         this.sps = sps;
+        this.spotify_player = spotify_player;
     }
 
     @Override

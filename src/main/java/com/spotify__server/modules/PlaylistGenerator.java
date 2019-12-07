@@ -6,6 +6,8 @@
 package com.spotify__server.modules;
 
 import com.spotify__server.components.SpotifyPlayer;
+import com.spotify__server.components.SpotifyPlayerState;
+
 import java.io.IOException;
 import java.util.Queue;
 import java.util.Timer;
@@ -19,10 +21,11 @@ public class PlaylistGenerator {
     private Queue<Song> play_queue;
     private Timer timer;
     private SpotifyPlayer spotify_player;
+    private SpotifyPlayerState sps;
     private TimerTask timer_task;
     
-    public PlaylistGenerator(SpotifyPlayer spotify_player) {
-        this.play_queue = play_queue;
+    public PlaylistGenerator(SpotifyPlayer spotify_player, SpotifyPlayerState sps) {
+        this.sps = sps;
         this.spotify_player = spotify_player;
         timer = new Timer();
         timer_task = new TimerTask() {

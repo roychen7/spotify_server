@@ -5,7 +5,7 @@
  */
 package com.spotify__server.controllers;
 
-import com.spotify__server.database_access.DatabaseAccesser;
+import com.spotify__server.components.accessers.database_access.DatabaseAccesser;
 import com.spotify__server.enums.PlaylistGenStatus;
 import com.spotify__server.modules.Song;
 import com.spotify__server.utils.WeightedRandomGenerator;

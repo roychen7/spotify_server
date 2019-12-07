@@ -6,9 +6,7 @@
 package com.spotify__server.controllers;
 
 import com.spotify__server.initializers.InitializeAll;
-import com.spotify__server.initializers.PlaylistAndSongInitializer;
 import java.io.IOException;
-import java.sql.SQLException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,10 +14,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.spotify__server.utils.HelperClass;
 import com.spotify__server.components.SpotifyPlayer;
 import com.spotify__server.components.SpotifyPlayerState;
-import com.spotify__server.database_access.DatabaseAccesser;
+import com.spotify__server.components.accessers.database_access.DatabaseAccesser;
+import com.spotify__server.components.accessers.spotify_api_access.SpotifyApiAccesser;
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.minidev.json.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -38,10 +37,16 @@ public class LoginController {
     private SpotifyPlayerState sps;  
 
     @Autowired
+    private SpotifyApiAccesser api_accesser;
+
+    @Autowired
     private SpotifyPlayer spotify_player;
 
     @Autowired
     private InitializeAll initializer;
+
+    @Autowired
+    private DatabaseAccesser database_accesser;
     
     // thread sleeps until awoken, and checks if token in db is valid, returns code 2xx if it is, if invalid, then sleeps again and repeats process
     @GetMapping("/login")
@@ -53,14 +58,14 @@ public class LoginController {
         int responseCode;
         synchronized (LoginController.class) {
             try {
-                while (Integer.toString(responseCode = HelperClass.verifyToken(DatabaseAccesser.getAccessToken())).charAt(0) != "2".charAt(0)) {
+                while (Integer.toString(responseCode = HelperClass.verifyToken(database_accesser.getAccessToken())).charAt(0) != "2".charAt(0)) {
                     System.out.println("/login right before waiting");
                     LoginController.class.wait();
                     System.out.println("/login awoke from waiting");
                 }
                 
                 if (sps.getConnected() == 0) {
-                    initializer.initInitializer(sps, spotify_player);
+                    initializer.initInitializer(api_accesser, sps, spotify_player);
                     initializer.initialize();
                     System.out.println("initiated spotify player manager play status!");
                     sps.setConnected(1); 

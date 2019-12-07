@@ -9,7 +9,8 @@ import com.spotify__server.utils.HelperClass;
 import com.spotify__server.components.SpotifyPlayer;
 import com.spotify__server.components.SpotifyPlayerState;
 import com.spotify__server.repositories.JdbcRepository;
-import com.spotify__server.database_access.DatabaseAccesser;
+import com.spotify__server.components.accessers.database_access.DatabaseAccesser;
+import com.spotify__server.components.accessers.spotify_api_access.SpotifyApiAccesser;
 import com.spotify__server.initializers.InitializeAll;
 
 import java.io.IOException;
@@ -41,6 +42,12 @@ public class TokenController {
     private SpotifyPlayerState sps;
 
     @Autowired
+    private DatabaseAccesser database_accesser;
+
+    @Autowired
+    private SpotifyApiAccesser api_accesser;
+
+    @Autowired
     private SpotifyPlayer spotify_player;
 
     @Autowired
@@ -55,7 +62,7 @@ public class TokenController {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Access-Control-Allow-Origin", "http://localhost:3000");
 
-        String ress = DatabaseAccesser.getAccessToken();
+        String ress = database_accesser.getAccessToken();
          
         return new ResponseEntity<>(ress, headers, HttpStatus.ACCEPTED);
     }
@@ -64,7 +71,7 @@ public class TokenController {
     @GetMapping("/update")
     public void test() throws IOException, SQLException {
         System.out.println("connecting from Token::/update");
-        DatabaseAccesser.updateAccessToken();
+        database_accesser.updateAccessToken();
     }
     
     
@@ -93,7 +100,7 @@ public class TokenController {
             if (Integer.toString(code).charAt(0) == "2".charAt(0)) {
                 if (sps.getConnected() == 0) {
                     
-                    initializer.initInitializer(sps, spotify_player);
+                    initializer.initInitializer(api_accesser, sps, spotify_player);
                     initializer.initialize();
                     System.out.println("initiated spotify player manager play status!");
                     sps.setConnected(1); 

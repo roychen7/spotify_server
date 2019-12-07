@@ -6,7 +6,7 @@
 package com.spotify__server.controllers;
 
 import com.spotify__server.components.SpotifyPlayerState;
-import com.spotify__server.database_access.DatabaseAccesser;
+import com.spotify__server.components.accessers.database_access.DatabaseAccesser;
 import com.spotify__server.enums.PlaylistGenStatus;
 import com.spotify__server.modules.Song;
 import com.spotify__server.utils.WeightedRandomGenerator;
@@ -35,6 +35,9 @@ public class PlaylistGeneratorController {
     
     @Autowired
     private SpotifyPlayerState sps;
+
+    @Autowired
+    private DatabaseAccesser database_accesser;
     
     @GetMapping("/init_generator")
     public ResponseEntity initBiasedPlaylist() throws SQLException, IOException {
@@ -42,7 +45,7 @@ public class PlaylistGeneratorController {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Access-Control-Allow-Origin", "http://localhost:3000");
         
-        List<Song> random_playlist_song_list = DatabaseAccesser.getRandomPlaylistSongs(sps.getCompletedPlaylists());
+        List<Song> random_playlist_song_list = database_accesser.getRandomPlaylistSongs(sps.getCompletedPlaylists());
         WeightedRandomGenerator wrg = new WeightedRandomGenerator(random_playlist_song_list);
         Queue<Song> play_queue = wrg.getBiasedTenSongs();
         
@@ -54,12 +57,11 @@ public class PlaylistGeneratorController {
         
         sps.setPlaylistGeneratorStatus(PlaylistGenStatus.TRUE);
         
-        List<Pair<String, String>> ret_temp = new ArrayList<>();
-        
-        for (int i = 0; i < play_queue.size(); i++) {
+        List<String> ret_temp = new ArrayList<>();
+
+        for (int i = 0; i < 10; i++) {
             Song s = play_queue.poll();
-            Pair p1 = new Pair(s.getName(), s.getPlaylistName());
-            ret_temp.add(p1);
+            ret_temp.add(s.getName());
         }
         
         return new ResponseEntity(ret_temp, headers, HttpStatus.ACCEPTED);

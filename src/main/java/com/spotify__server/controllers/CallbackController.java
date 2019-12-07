@@ -9,7 +9,7 @@ package com.spotify__server.controllers;
 import com.spotify__server.utils.HelperClass;
 import com.spotify__server.components.SpotifyPlayerState;
 import com.spotify__server.repositories.JdbcRepository;
-import com.spotify__server.database_access.DatabaseAccesser;
+import com.spotify__server.components.accessers.database_access.DatabaseAccesser;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
@@ -49,6 +49,9 @@ import org.springframework.context.annotation.ComponentScan;
 @RestController
 @ComponentScan("com.spotify__server")
 public class CallbackController {
+
+    @Autowired
+    private DatabaseAccesser database_accesser;
     
     @Autowired
     private SpotifyPlayerState sps;
@@ -102,7 +105,7 @@ public class CallbackController {
         System.out.println("/callback after rs.next()");
         String str = "insert into `token` (`access_token`, `refresh_token`) values ('" +access_token+ "','" +refresh_token+ "')";
         stmt.executeUpdate(str);
-        DatabaseAccesser.updateAccessToken();
+        database_accesser.updateAccessToken();
         con.close();
         
         synchronized(LoginController.class) {

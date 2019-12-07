@@ -30,9 +30,11 @@ public class WeightedRandomGenerator {
         total = 0;
         for (int i = 0; i < song_list.size(); i++) {
             Song s = song_list.get(i);
+            System.out.println("Song weight is: " + s.getWeight()); 
             total += s.getWeight();
             map.put(total, s);
         }
+        System.out.println("TOTAL IS: " + total);
     }
     
     public Queue<Song> getBiasedTenSongs() {

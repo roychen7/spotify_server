@@ -5,19 +5,15 @@
  */
 package com.spotify__server.components;
 
-import com.spotify__server.utils.HelperClass;
-import com.spotify__server.database_access.DatabaseAccesser;
+import com.spotify__server.components.accessers.spotify_api_access.SpotifyApiAccesser;
 import com.spotify__server.enums.PlaylistGenStatus;
 import com.spotify__server.modules.Song;
+
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Queue;
-import net.minidev.json.JSONObject;
-import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.HttpClients;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -28,6 +24,10 @@ import org.springframework.stereotype.Component;
 // responsible for managing active spotify playback properties (eg. song, volume, etc.) and state
 @Component
 public class SpotifyPlayerState {
+    
+    @Autowired
+    private SpotifyApiAccesser api_accesser;
+
     private int connected;
     public final String test = "";
     private boolean play_status;
@@ -37,23 +37,9 @@ public class SpotifyPlayerState {
 
     public void initPlayStatus() {
         
+        completed_playlists = new HashSet<>();
         try {
-            pgs = PlaylistGenStatus.FALSE;
-            completed_playlists = new HashSet<>();
-            System.out.println("inside init playstatus!");
-            HttpGet get = new HttpGet("https://api.spotify.com/v1/me/player");
-            get.addHeader("Authorization", "Bearer " + DatabaseAccesser.getAccessToken());
-            HttpResponse response = HttpClients.createDefault().execute(get);
-
-            String str = HelperClass.getResponseString(response.getEntity());
-            if (str.equals(null) || "".equals(str)) {
-                play_status = false;
-                return;
-            }
-            JSONParser parser = new JSONParser();
-            JSONObject obj = (JSONObject) parser.parse(str);
-
-            play_status = (boolean) obj.get("is_playing");
+            play_status = api_accesser.getPlayStatus();
         } catch (IOException e) {
             e.printStackTrace();
         } catch (ParseException e) {

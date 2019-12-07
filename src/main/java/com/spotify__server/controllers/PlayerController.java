@@ -6,12 +6,13 @@
 package com.spotify__server.controllers;
 
 import com.spotify__server.components.SpotifyPlayerState;
-import com.spotify__server.database_access.DatabaseAccesser;
+import com.spotify__server.components.accessers.database_access.DatabaseAccesser;
 import java.io.IOException;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -30,6 +31,9 @@ public class PlayerController {
     
     @Autowired
     private SpotifyPlayerState sps;
+
+    @Autowired
+    private DatabaseAccesser database_accesser;
         
     // mapping for pausing current song
     @GetMapping("/pause")
@@ -39,7 +43,7 @@ public class PlayerController {
             HttpClient client = HttpClients.createDefault();
             HttpPut put = new HttpPut("https://api.spotify.com/v1/me/player/pause");
             
-            put.addHeader("Authorization", "Bearer " + DatabaseAccesser.getAccessToken());
+            put.addHeader("Authorization", "Bearer " + database_accesser.getAccessToken());
             
             headers = new HttpHeaders();
             headers.set("Access-Control-Allow-Origin", "http://localhost:3000");
@@ -74,21 +78,30 @@ public class PlayerController {
     // mapping for playing current song
     @GetMapping("/play")
     public ResponseEntity playSong() {
+
+        System.out.println("PlayerController::playSong() beginning");
+
         HttpHeaders headers = null;
         try {
             HttpClient client = HttpClients.createDefault();
             HttpPut put = new HttpPut("https://api.spotify.com/v1/me/player/play");
             
-            put.addHeader("Authorization", "Bearer " + DatabaseAccesser.getAccessToken());
-            
+            System.out.println("PlayerController::playSong() before getAccessToken");
+            put.addHeader("Authorization", "Bearer " + database_accesser.getAccessToken());
+            System.out.println("PlayerController::playSong() after getAccessToken");
+
             headers = new HttpHeaders();
             headers.set("Access-Control-Allow-Origin", "http://localhost:3000");
             
+            System.out.println("PlayerController::playSong() before execute put");
             HttpResponse response = client.execute(put);
+            System.out.println("PlayerController::playSong() after execute put");
             
             sps.setPlayStatus(true);
+            System.out.println("PlayerController::playSong() returning");
             return new ResponseEntity<>(response, headers, HttpStatus.ACCEPTED);
         } catch (IOException ex) {
+            System.out.println("PlayerController::playSong() caught IOException");
             return new ResponseEntity<>(ex.getMessage(), headers, HttpStatus.NOT_FOUND);
         }
     }
