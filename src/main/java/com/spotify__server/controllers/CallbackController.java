@@ -53,9 +53,6 @@ public class CallbackController {
     @Autowired
     private DatabaseAccesser database_accesser;
     
-    @Autowired
-    private SpotifyPlayerState sps;
-    
     // uses authorization code to request for access token, stores it in db once retrieved
     @RequestMapping("/callback") 
     public ResponseEntity callback(@RequestParam String code) throws MalformedURLException, JSONException, UnsupportedEncodingException, IOException, ParseException, SQLException {

@@ -75,10 +75,10 @@ public class LoginController {
             }
             catch (IOException ex) {
                 Logger.getLogger(LoginController.class.getName()).log(Level.SEVERE, null, ex);
-                return new ResponseEntity<>("An error occured", headers, HttpStatus.ACCEPTED);
+                return new ResponseEntity<>("An error occured", headers, HttpStatus.NOT_FOUND);
             } catch (InterruptedException ex) {
                 Logger.getLogger(LoginController.class.getName()).log(Level.SEVERE, null, ex);
-                return new ResponseEntity<>("An error occured", headers, HttpStatus.ACCEPTED);
+                return new ResponseEntity<>("An error occured", headers, HttpStatus.CONFLICT);
             }
         }
     }   

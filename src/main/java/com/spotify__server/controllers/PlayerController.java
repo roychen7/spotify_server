@@ -85,22 +85,16 @@ public class PlayerController {
             HttpClient client = HttpClients.createDefault();
             HttpPut put = new HttpPut("https://api.spotify.com/v1/me/player/play");
             
-            System.out.println("PlayerController::playSong() before getAccessToken");
             put.addHeader("Authorization", "Bearer " + database_accesser.getAccessToken());
-            System.out.println("PlayerController::playSong() after getAccessToken");
 
             headers = new HttpHeaders();
             headers.set("Access-Control-Allow-Origin", "http://localhost:3000");
             
-            System.out.println("PlayerController::playSong() before execute put");
             HttpResponse response = client.execute(put);
-            System.out.println("PlayerController::playSong() after execute put");
             
             sps.setPlayStatus(true);
-            System.out.println("PlayerController::playSong() returning");
             return new ResponseEntity<>(response, headers, HttpStatus.ACCEPTED);
         } catch (IOException ex) {
-            System.out.println("PlayerController::playSong() caught IOException");
             return new ResponseEntity<>(ex.getMessage(), headers, HttpStatus.NOT_FOUND);
         }
     }

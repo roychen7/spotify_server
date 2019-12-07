@@ -9,7 +9,7 @@ package com.spotify__server.modules;
  *
  * @author roychen
  */
-public class Song implements Comparable {
+public class Song {
     private String playlist_id;
     private String name;
     private String uri;
@@ -68,12 +68,4 @@ public class Song implements Comparable {
         return uri.hashCode();
     }
 
-    @Override
-    public int compareTo(Object o) {
-        if (o instanceof Song) {
-            Song s = (Song) o;
-            return this.uri.compareTo(s.getUri());
-        }
-        else return -1;
-    }
 }

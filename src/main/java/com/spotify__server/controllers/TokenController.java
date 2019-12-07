@@ -110,10 +110,8 @@ public class TokenController {
         
              return new ResponseEntity<>(code, headers, HttpStatus.ACCEPTED);
         } catch (SQLException ex) {
-            System.out.println("sqlexception from token");
             return new ResponseEntity<>(ex.getMessage(), headers, HttpStatus.SERVICE_UNAVAILABLE);
         } catch (IOException ex) {
-            System.out.println("ioException from token");
             return new ResponseEntity<>(ex.getMessage(), headers, HttpStatus.NOT_FOUND);
         }
     }
