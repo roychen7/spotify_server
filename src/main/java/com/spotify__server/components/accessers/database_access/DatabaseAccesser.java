@@ -83,18 +83,7 @@ public class DatabaseAccesser {
             return ret;
         }
     }
-    
-    @Cacheable(cacheNames="playlistNames")
-    public List<String> getPlaylistIds() {
-        return getListFromDb(1, "select `playlist_id` from `playlists`");
-    }
-    
-    @CachePut(cacheNames="playlistNames")
-    public List<String> updatePlaylistIds() {
-        return getListFromDb(1, "select `playlist_id` from `playlists`");
-    }
 
-    // below are generic functions that don't need to be cached
     public List<Song> getRandomPlaylistSongs(HashSet<String> completed_playlists) throws SQLException, IOException {
         List<String> playlist_ids = getPlaylistIds();
         Random random = new Random();
@@ -123,7 +112,18 @@ public class DatabaseAccesser {
         
         return ret_songs;
     }
+    
 
+    // below are more specific functions that can have cached results to improve performance
+    @Cacheable(cacheNames="playlistNames")
+    public List<String> getPlaylistIds() {
+        return getListFromDb(1, "select `playlist_id` from `playlists`");
+    }
+    
+    @CachePut(cacheNames="playlistNames")
+    public List<String> updatePlaylistIds() {
+        return getListFromDb(1, "select `playlist_id` from `playlists`");
+    }
 
     @Cacheable(cacheNames = "getToken")
     public String getAccessToken() {

@@ -16,6 +16,7 @@ public class RefreshTokenInitializer implements Initializer, Runnable {
     public RefreshTokenInitializer(SpotifyApiAccesser api_accesser) {
         this.api_accesser = api_accesser;
     }
+    
     @Override
     public void run() {
         initialize();

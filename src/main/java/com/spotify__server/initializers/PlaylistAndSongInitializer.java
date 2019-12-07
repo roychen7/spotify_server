@@ -5,9 +5,7 @@
  */
 package com.spotify__server.initializers;
 
-import com.spotify__server.components.SpotifyPlayerState;
 import com.spotify__server.components.accessers.spotify_api_access.SpotifyApiAccesser;
-import com.spotify__server.modules.Playlist;
 
 import org.apache.http.client.ClientProtocolException;
 

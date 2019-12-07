@@ -31,7 +31,6 @@ import java.util.List;
 import java.util.Queue;
 
 import javafx.util.Pair;
-import java.util.HashSet;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -65,6 +64,7 @@ public class SpotifyApiAccesser {
         return jsonObj.getAsString("id");
     }
 
+
     public List<Pair<String, String>> getAndUpdatePlaylistIdsAndNames(String user_id)
             throws ClientProtocolException, IOException, ParseException {
         HttpGet get = new HttpGet("https://api.spotify.com/v1/users/" + user_id + "/playlists");
@@ -90,6 +90,7 @@ public class SpotifyApiAccesser {
         database_accesser.updatePlaylistIds();
         return ret_list;
     }
+
 
     public void updatePlaylistSongsIntoDbFromApi(String playlist_id, int noOfResets)
             throws ClientProtocolException, IOException, ParseException {
@@ -156,6 +157,7 @@ public class SpotifyApiAccesser {
         }
     }
 
+
     public void refreshToken() throws FileNotFoundException, SQLException, IOException, ParseException {
         HttpPost post = new HttpPost("https://accounts.spotify.com/api/token");
 
@@ -184,6 +186,7 @@ public class SpotifyApiAccesser {
         System.out.println("Token::/refresh: updated token!");
     }
 
+
     public void togglePlay() throws ClientProtocolException, IOException {
         HttpPut put = new HttpPut("https://api.spotify.com/v1/me/player/play");
 
@@ -193,6 +196,7 @@ public class SpotifyApiAccesser {
         client.execute(put);
     }
 
+
     public void togglePause() throws ClientProtocolException, IOException {
         HttpPut put = new HttpPut("https://api.spotify.com/v1/me/player/pause");
 
@@ -201,6 +205,7 @@ public class SpotifyApiAccesser {
 
         client.execute(put);
     }
+
 
     public void playSongs(Queue<Song> songs) throws ClientProtocolException, IOException {
         HttpPut put = new HttpPut("https://api.spotify.com/v1/me/player/play");
@@ -223,6 +228,7 @@ public class SpotifyApiAccesser {
         client.execute(put);
     }
 
+
     public boolean getPlayStatus() throws ClientProtocolException, IOException, ParseException {
 
         HttpGet get = new HttpGet("https://api.spotify.com/v1/me/player");
@@ -242,7 +248,8 @@ public class SpotifyApiAccesser {
         return play_status;
     }
 
-    // append a second "'" character everytime we encounter one 
+
+    // helper function, appends a second "'" character everytime we encounter one 
     private String handleQuotation(String song_name, int ind_of_quote) {  
         StringBuilder ret = new StringBuilder(song_name.substring(0, ind_of_quote));
         
