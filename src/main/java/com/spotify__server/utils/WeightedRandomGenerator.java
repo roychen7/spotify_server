@@ -42,17 +42,17 @@ public class WeightedRandomGenerator {
     public Queue<Song> getBiasedTenSongs() {
         Queue<Song> ret_queue = new LinkedList<>();
         for (int i = 0; i < 10; i++) {
-            Song s = getNext();
-            ret_queue.add(s);
-            map.remove(s);
+            Entry e = getNext();
+            ret_queue.add( (Song) e.getValue() );
+            map.remove( e.getKey() );
         }
-        
+
         return ret_queue;
     }
 
-    private Song getNext() {
+    private Entry getNext() {
         int random_int = random.nextInt(total);
         Entry ret = map.higherEntry(random_int);
-        return (Song) ret.getValue();
+        return ret;
     }
 }
