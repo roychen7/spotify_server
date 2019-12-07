@@ -6,6 +6,9 @@ import java.util.Enumeration;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.spotify__server.components.SpotifyPlayerState;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +22,9 @@ import net.minidev.json.parser.JSONParser;
 
 @RestController
 public class SpotifyStateUpdaterController {
+
+    @Autowired
+    private SpotifyPlayerState sps;
     
     @ResponseBody @PutMapping("/testputmapping")
     public String testPutMapping(final HttpServletResponse response, final HttpServletRequest request) {
@@ -39,12 +45,47 @@ public class SpotifyStateUpdaterController {
 
         JSONParser parser = new JSONParser();
         JSONObject obj = (JSONObject) parser.parse(jbString);
+        
         System.out.println(obj.getAsString("test"));
-
-        } catch (final Exception e) {
-
+        return obj.getAsString("test");
+        } catch (Exception e) {
+            return "Failed";
         }
-                
-        return "";
+    }
+
+    @ResponseBody @PutMapping("/update_play_status")
+    public String updatePlayStatus(HttpServletResponse response, HttpServletRequest request) {
+        response.addHeader("Access-Control-Allow-Origin", "http://localhost:3000");
+        response.addHeader("Access-Control-Allow-Methods", "PUT");
+        response.addHeader("Access-Control-Allow-Headers", "Content-Type");
+
+        StringBuffer sb = new StringBuffer();
+        String line = null;
+
+        try {
+            BufferedReader br = request.getReader();
+            while ((line = br.readLine()) != null) {
+                sb.append(line);
+            }
+
+            String req_body_string = sb.toString();
+            JSONParser parser = new JSONParser();
+            JSONObject obj = (JSONObject) parser.parse(req_body_string);
+
+            String req_body_value = obj.getAsString("value");
+
+            boolean bool_val;
+
+            if (req_body_value != null && !req_body_value.equals("")) {
+                if ((bool_val = Boolean.parseBoolean(req_body_value)) == true || (bool_val == false)) {
+                    sps.setPlayStatus(bool_val);
+                    return "OK";
+                }
+            }
+
+            return "Invalid body value";
+        } catch (Exception e) {
+            return "Exception was caught " + e.getMessage();
+        }
     }
 }

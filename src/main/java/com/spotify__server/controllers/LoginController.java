@@ -19,9 +19,13 @@ import com.spotify__server.components.accessers.spotify_api_access.SpotifyApiAcc
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  *
@@ -49,12 +53,12 @@ public class LoginController {
     private DatabaseAccesser database_accesser;
     
     // thread sleeps until awoken, and checks if token in db is valid, returns code 2xx if it is, if invalid, then sleeps again and repeats process
-    @GetMapping("/login")
-    public ResponseEntity login() {
+    @ResponseBody @GetMapping("/login")
+    public String login(HttpServletResponse response) {
         
         // setting headers to allow access from electron application from localhost:3000
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Access-Control-Allow-Origin", "http://localhost:3000");
+        response.addHeader("Access-Control-Allow-Origin", "http://localhost:3000");
+        
         int responseCode;
         synchronized (LoginController.class) {
             try {
@@ -71,14 +75,12 @@ public class LoginController {
                     sps.setConnected(1); 
                 }
                 System.out.println("/login before returning, code is: " + responseCode);
-                return new ResponseEntity<>(responseCode, headers, HttpStatus.ACCEPTED);
+                return "OK";
             }
             catch (IOException ex) {
-                Logger.getLogger(LoginController.class.getName()).log(Level.SEVERE, null, ex);
-                return new ResponseEntity<>("An error occured", headers, HttpStatus.NOT_FOUND);
+                return "An error occured " + ex.getMessage();
             } catch (InterruptedException ex) {
-                Logger.getLogger(LoginController.class.getName()).log(Level.SEVERE, null, ex);
-                return new ResponseEntity<>("An error occured", headers, HttpStatus.CONFLICT);
+                return "An error occured " + ex.getMessage();
             }
         }
     }   

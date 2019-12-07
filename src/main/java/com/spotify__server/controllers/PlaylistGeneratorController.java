@@ -8,6 +8,7 @@ package com.spotify__server.controllers;
 import com.spotify__server.components.SpotifyPlayer;
 import com.spotify__server.components.SpotifyPlayerState;
 import com.spotify__server.components.accessers.database_access.DatabaseAccesser;
+import com.spotify__server.components.accessers.database_access.PlaylistDatabaseAccesser;
 import com.spotify__server.enums.PlaylistGenStatus;
 import com.spotify__server.modules.PlaylistGenerator;
 import com.spotify__server.modules.Song;
@@ -17,6 +18,9 @@ import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Queue;
+
+import javax.servlet.http.HttpServletResponse;
+
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.apache.http.HttpResponse;
@@ -30,6 +34,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -48,15 +53,14 @@ public class PlaylistGeneratorController {
     private SpotifyPlayerState sps;
 
     @Autowired
-    private DatabaseAccesser database_accesser;
+    private PlaylistDatabaseAccesser playlist_database_accesser;
     
-    @GetMapping("/init_generator")
-    public ResponseEntity initBiasedPlaylist() throws SQLException, IOException {
+    @ResponseBody @GetMapping("/init_generator")
+    public String initBiasedPlaylist(HttpServletResponse response) throws SQLException, IOException {
+
+        response.addHeader("Access-Control-Allow-Origin", "http://localhost:3000");
         
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Access-Control-Allow-Origin", "http://localhost:3000");
-        
-        List<Song> random_playlist_song_list = database_accesser.getRandomPlaylistSongs(sps.getCompletedPlaylists());
+        List<Song> random_playlist_song_list = playlist_database_accesser.getRandomPlaylistSongs(sps.getCompletedPlaylists());
         WeightedRandomGenerator wrg = new WeightedRandomGenerator(random_playlist_song_list);
         Queue<Song> play_queue = wrg.getBiasedTenSongs();
         
@@ -65,11 +69,9 @@ public class PlaylistGeneratorController {
        PlaylistGenerator pg = new PlaylistGenerator(spotify_player, sps);
        pg.initPlaying();
         
-        
         sps.setPlaylistGeneratorStatus(PlaylistGenStatus.TRUE);
         
-        return new ResponseEntity("", headers, HttpStatus.ACCEPTED);
-        
+        return "OK";
     }
     
     // @GetMapping("/testplaygenerator")

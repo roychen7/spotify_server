@@ -113,6 +113,6 @@ public class CallbackController {
         return new ResponseEntity<>("Loading...", HttpStatus.ACCEPTED);
         } catch (Error e) {
         return new ResponseEntity<>("An Error was encountered during connection to db", HttpStatus.BAD_REQUEST);
-    }
+        }
     }
 }

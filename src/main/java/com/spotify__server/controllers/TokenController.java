@@ -65,15 +65,7 @@ public class TokenController {
         String ress = database_accesser.getAccessToken();
          
         return new ResponseEntity<>(ress, headers, HttpStatus.ACCEPTED);
-    }
-        
-    // test mapping to update SpotifyListener's cached access token
-    @GetMapping("/update")
-    public void test() throws IOException, SQLException {
-        System.out.println("connecting from Token::/update");
-        database_accesser.updateAccessToken();
-    }
-    
+    }  
     
     // tests whether token is valid or not by calling HelperClass's verifyToken function 
     @GetMapping("/valid_token")

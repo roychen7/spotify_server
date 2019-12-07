@@ -2,6 +2,7 @@ package com.spotify__server.components.accessers.spotify_api_access;
 
 // package dependencies
 import com.spotify__server.components.accessers.database_access.DatabaseAccesser;
+import com.spotify__server.components.accessers.database_access.PlaylistDatabaseAccesser;
 import com.spotify__server.modules.Song;
 import com.spotify__server.utils.HelperClass;
 
@@ -41,6 +42,9 @@ public class SpotifyApiAccesser {
 
     @Autowired
     private DatabaseAccesser database_accesser;
+
+    @Autowired
+    private PlaylistDatabaseAccesser playlist_database_accesser;
 
     private HttpClient client = HttpClients.createDefault();
 
@@ -87,7 +91,7 @@ public class SpotifyApiAccesser {
                     + ret_list.get(i).getKey() + "', `playlist_name`='" + ret_list.get(i).getValue() + "'");
         }
 
-        database_accesser.updatePlaylistIds();
+        playlist_database_accesser.updatePlaylistIds();
         return ret_list;
     }
 

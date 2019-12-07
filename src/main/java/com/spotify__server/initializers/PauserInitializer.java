@@ -13,6 +13,7 @@ public class PauserInitializer implements Initializer, Runnable {
     private int pause_time = 0;
     private boolean already_paused = false;
     private boolean supposed_to_pause;
+    
     private SpotifyPlayerState sps;  
     private SpotifyPlayer spotify_player;
 
