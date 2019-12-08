@@ -84,4 +84,11 @@ public class SpotifyStateUpdaterController {
             return "Exception was caught " + e.getMessage();
         }
     }
+
+    @ResponseBody @PutMapping("/update_song_stats")
+    public String updateSongStats(HttpServletResponse response, HttpServletRequest request) {
+        
+        
+        return "";
+    }
 }

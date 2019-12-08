@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.util.Queue;
 
 import org.apache.http.client.ClientProtocolException;
-// responsible for managing active spotify playback properties (eg. song, volume, etc.) and state
+// responsible for managing active spotify playback
 @Component
 public class SpotifyPlayer {
 
