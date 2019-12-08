@@ -74,31 +74,6 @@ public class PlaylistGeneratorController {
         return "OK";
     }
     
-    // @GetMapping("/testplaygenerator")
-    // public ResponseEntity testPlayGenerator() throws UnsupportedEncodingException, IOException {
-    //     HttpPut put = new HttpPut("https://api.spotify.com/v1/me/player/play");
-    //     HttpClient client = HttpClients.createDefault();
-        
-    //     JSONObject obj = new JSONObject();
-        
-    //     JSONArray arr = new JSONArray();
-    //     arr.add("spotify:track:7zxRMhXxJMQCeDDg0rKAVo");
-        
-    //     obj.appendField("uris", arr);
-        
-    //     String bodyString = obj.toString();
-    //     System.out.println(bodyString);
-    //     StringEntity entityString = new StringEntity(bodyString);
-        
-    //     put.setEntity(entityString);
-    //     put.setHeader("Content-type", "application/json");
-    //     put.setHeader("Authorization", "Bearer " + database_accesser.getAccessToken());
-        
-    //     HttpResponse response = client.execute(put);
-        
-    //     return new ResponseEntity<>(response, HttpStatus.ACCEPTED);
-    // }
-    
     @GetMapping("/resume_generator")
     public ResponseEntity resumeBiasedPlaylists() {
         
