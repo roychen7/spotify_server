@@ -25,7 +25,14 @@ public class Song {
         calculateWeight(playcount);
     }
     
-    private void calculateWeight(int playcount) {
+    public Song(String playlist_id, String song_uri, String song_name, String song_duration) {
+        this.playlist_id = playlist_id;
+        this.uri = song_uri;
+        this.name = song_name;
+        this.duration_ms = Integer.parseInt(song_duration);
+	}
+
+	private void calculateWeight(int playcount) {
        if (playcount >= 0 && playcount <= 2) {
            weight = 1;
        } else if (playcount >= 3 && playcount <= 5) {
@@ -67,5 +74,9 @@ public class Song {
     public int hashCode() {
         return uri.hashCode();
     }
+
+	public String getPlaylistId() {
+		playlist_id;
+	}
 
 }

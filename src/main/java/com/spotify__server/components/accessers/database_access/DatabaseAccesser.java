@@ -18,9 +18,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -54,7 +52,7 @@ public class DatabaseAccesser {
             if (rs.next()) {
                 return rs.getString(1);
             } 
-            return "";
+            return "NULL";
         } catch (IOException e) {
             e.printStackTrace();
             return "";
@@ -85,6 +83,7 @@ public class DatabaseAccesser {
         }
     }
 
+    // below are more specific functions that can have cached results to improve performance
     @Cacheable(cacheNames = "getToken")
     public String getAccessToken() {
         System.out.println("not cached!");

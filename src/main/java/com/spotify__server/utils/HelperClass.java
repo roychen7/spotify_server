@@ -37,12 +37,15 @@ public class HelperClass {
             return null;
         }
     }
+    
     return builder.toString();
     }
     
     // param str is access token, ánd the code checks the access token against a certain spotify api call,
     // for the sole purpose of determining if the given access token is valid or not. Return 
     // value is response code of api call, 2xx if valid token and 4xx if invalid token
+
+    // TODO: refactor to return true or false instead of int code
     public static int verifyToken(String str) throws MalformedURLException, IOException {        
         HttpClient client = HttpClients.createDefault();
         HttpGet get = new HttpGet("https://api.spotify.com/v1/me/player");

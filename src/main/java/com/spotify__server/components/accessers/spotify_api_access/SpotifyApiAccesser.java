@@ -95,6 +95,23 @@ public class SpotifyApiAccesser {
         return ret_list;
     }
 
+    public Song getSongDetails(String song_id) throws org.apache.http.ParseException, IOException, ParseException {
+        HttpGet get = new HttpGet("https://api.spotify.com/v1/tracks/" + song_id);
+        get.addHeader("Authorization", "Bearer " + database_accesser.getAccessToken());
+
+        HttpResponse response = client.execute(get);
+        String response_string = EntityUtils.toString(response.getEntity());
+        JSONParser parser = new JSONParser();
+        JSONObject obj = (JSONObject) parser.parse(response_string);
+
+        String song_name = obj.getAsString("name");
+        String song_uri = obj.getAsString("uri");
+        String song_duration = obj.getAsString("duration_ms");
+
+        String playlist_id = database_accesser.getSingleFromDb("select `playlist_id` from `songs` where `song_uri`='" + song_uri);
+        return new Song(playlist_id, song_uri, song_name, song_duration);
+    }
+
 
     public void updatePlaylistSongsIntoDbFromApi(String playlist_id, int noOfResets)
             throws ClientProtocolException, IOException, ParseException {
@@ -124,14 +141,18 @@ public class SpotifyApiAccesser {
             int ind_of_quote = -1;
 
                 if ((ind_of_quote = song_name.indexOf("'")) == -1) {
-                    insert_string = "insert ignore into `songs` set `playlist_id`='" + playlist_id + "', `song_id`='"
-                            + song_id + "', `song_uri`='" + song_uri + "', `song_name`='" + song_name + "', `song_duration`='" 
-                            + song_duration + "', `date_played`='" + null + "'";
+                    // insert_string = "insert ignore into `songs` set `playlist_id`='" + playlist_id + "', `song_id`='"
+                    //         + song_id + "', `song_uri`='" + song_uri + "', `song_name`='" + song_name + "', `song_duration`='" 
+                    //         + song_duration + "', `date_played`='" + null + "'";
+                    insert_string = "insert ignore into `songs` values ('" + playlist_id + "', '" + song_uri + "', '" + song_name + "', '" + 
+                    song_duration + "', '0', 'NULL'";
                 } else {
                     String song_name_reformatted = handleQuotation(song_name, ind_of_quote);
-                    insert_string = "insert ignore into `songs` set `playlist_id`='" + playlist_id + "', `song_id`='"
-                            + song_id + "', `song_uri`='" + song_uri + "', `song_name`='" + song_name_reformatted + "', `song_duration`='"
-                            + song_duration + "', `date_played`='" + null + "'";
+                    // insert_string = "insert ignore into `songs` set `playlist_id`='" + playlist_id + "', `song_id`='"
+                    //         + song_id + "', `song_uri`='" + song_uri + "', `song_name`='" + song_name_reformatted + "', `song_duration`='"
+                    //         + song_duration + "', `date_played`='" + null + "'";
+                    insert_string = "insert ignore into `songs` values ('" + playlist_id + "', '" + song_uri + "', '" + song_name_reformatted + "', '" + 
+                    song_duration + "', '0', 'NULL'";
                 }
 
             if (!insert_string.equals("")) {

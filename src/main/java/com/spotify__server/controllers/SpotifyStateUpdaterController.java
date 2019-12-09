@@ -1,7 +1,6 @@
 package com.spotify__server.controllers;
 
 import java.io.BufferedReader;
-import java.util.Enumeration;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -87,8 +86,28 @@ public class SpotifyStateUpdaterController {
 
     @ResponseBody @PutMapping("/update_song_stats")
     public String updateSongStats(HttpServletResponse response, HttpServletRequest request) {
-        
-        
+        response.addHeader("Access-Control-Allow-Origin", "http://localhost:3000");
+        response.addHeader("Access-Control-Allow-Methods", "PUT");
+        response.addHeader("Access-Control-Allow-Headers", "Content-Type");
+
+        StringBuffer sb = new StringBuffer();
+        String line = null;
+
+        try {
+            BufferedReader br = request.getReader();
+            while ((line = br.readLine()) != null) {
+                sb.append(line);
+            }
+
+            String req_body_string = sb.toString();
+            JSONParser parser = new JSONParser();
+            JSONObject obj = (JSONObject) parser.parse(req_body_string);
+
+            String song_uri = obj.getAsString("song_uri");
+
         return "";
+        } catch (Exception e) {
+            return "Exception was caught " + e.getMessage();
+        }
     }
 }
