@@ -33,7 +33,7 @@ public class SpotifyPlayerState {
     private boolean play_status;
     private PlaylistGenStatus pgs;
     private Queue<Song> play_queue;
-    HashSet<String> completed_playlists;
+    private HashSet<String> completed_playlists;
 
     public void initPlayStatus() {
         
