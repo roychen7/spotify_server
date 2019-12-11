@@ -1,11 +1,13 @@
 package com.spotify__server.controllers;
 
 import java.io.BufferedReader;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.spotify__server.components.SpotifyPlayerState;
+import com.spotify__server.components.accessers.database_access.DatabaseAccesser;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
+import org.springframework.web.bind.annotation.GetMapping;
 
 @RestController
 public class SpotifyStateUpdaterController {
@@ -21,31 +24,9 @@ public class SpotifyStateUpdaterController {
     @Autowired
     private SpotifyPlayerState sps;
     
-    @ResponseBody @PutMapping("/testputmapping")
-    public String testPutMapping(final HttpServletResponse response, final HttpServletRequest request) {
-        response.addHeader("Access-Control-Allow-Origin", "http://localhost:3000");
-        response.addHeader("Access-Control-Allow-Methods", "PUT");
-        response.addHeader("Access-Control-Allow-Headers", "Content-Type");
-
-        final StringBuffer jb = new StringBuffer();
-        String line = null;
-
-        try {
-            final BufferedReader reader = request.getReader();
-            while ((line = reader.readLine()) != null) {
-                jb.append(line);
-            }
-        System.out.println(jb);
-        String jbString = jb.toString();
-
-        JSONParser parser = new JSONParser();
-        JSONObject obj = (JSONObject) parser.parse(jbString);
-        
-        System.out.println(obj.getAsString("test"));
-        return obj.getAsString("test");
-        } catch (Exception e) {
-            return "Failed";
-        }
+    @ResponseBody @GetMapping("/1test")
+    public String testPutMapping(HttpServletResponse response) {
+        return "";
     }
 
     @ResponseBody @PutMapping("/update_play_status")

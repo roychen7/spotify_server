@@ -1,6 +1,7 @@
 package com.spotify__server.components;
 
 import java.io.IOException;
+import java.util.List;
 
 import com.spotify__server.components.accessers.database_access.DatabaseAccesser;
 import com.spotify__server.components.accessers.spotify_api_access.SpotifyApiAccesser;
@@ -33,11 +34,30 @@ public class SongUpdater {
         Song song;
         try {
             song = api_accesser.getSongDetails(song_id);
-            database_accesser.insertIntoDb("insert into table values('" + song.getPlaylistId() + "', '" + song.getUri() + "', '" + song.getName() + "', '" + 
+            database_accesser.insertIntoDb("insert into `songs` values('" + song.getPlaylistId() + "', '" + song.getUri() + "', '" + song.getName() + "', '" + 
             Integer.toString(song.getDuration()) + "', '0', current_timestamp()) on duplicate key update `playcount`='" + 
             incPlayCount(database_accesser.getSingleFromDb("select `playcount` from `songs` where `song_uri`='" + song.getUri() + "'")) + "', `last_played`=current_timestamp()");
+        
+            removeSongIfBelowTop200();
         } catch (ParseException | IOException | net.minidev.json.parser.ParseException e) {
             e.printStackTrace();
+        }
+    }
+
+    private void removeSongIfBelowTop200() {
+        List<String> res = database_accesser.getListFromDb(2, "select `song_uri`, `playlist_id` from `songs` where `last_played` is not null order by `last_played` desc");
+
+        int diff = 0;
+        String visible = "";
+
+        if ((diff = res.size() - 400) > 0) {
+            for (int i = 0; i < diff; i = i + 2) {
+                if ((visible = res.get(i+1)).equals("NULL")) {
+                    System.out.println(visible);
+                    String song_uri = res.get(i);
+                    database_accesser.insertIntoDb("delete from `songs` where `song_uri`='" + song_uri + "'");
+                }
+            }
         }
     }
 

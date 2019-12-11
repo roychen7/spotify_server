@@ -76,7 +76,7 @@ public class Song {
     }
 
 	public String getPlaylistId() {
-		playlist_id;
+		return playlist_id;
 	}
 
 }
