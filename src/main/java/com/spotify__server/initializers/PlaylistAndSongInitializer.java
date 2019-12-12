@@ -41,10 +41,13 @@ public class PlaylistAndSongInitializer implements Runnable, Initializer {
             List<Pair<String, String>> playlist_ids_and_names = api_accesser.getAndUpdatePlaylistIdsAndNames(user_id);
             initPlaylistSongs(playlist_ids_and_names);  
         } catch (ClientProtocolException e) {
+            System.out.println("Encountered ClientProtocolException error");
             e.printStackTrace();
         } catch (IOException e) {
+            System.out.println("Encountered IOException error");
             e.printStackTrace();
         } catch (ParseException e) {
+            System.out.println("Encountered ParseException error");
             e.printStackTrace();
         }
     }

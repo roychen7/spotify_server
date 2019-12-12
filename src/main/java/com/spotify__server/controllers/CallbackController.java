@@ -7,7 +7,6 @@
 package com.spotify__server.controllers;
 
 import com.spotify__server.utils.HelperClass;
-import com.spotify__server.components.SpotifyPlayerState;
 import com.spotify__server.repositories.JdbcRepository;
 import com.spotify__server.components.accessers.database_access.DatabaseAccesser;
 import java.io.IOException;

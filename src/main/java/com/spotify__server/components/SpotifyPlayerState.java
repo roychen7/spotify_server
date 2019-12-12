@@ -21,7 +21,7 @@ import org.springframework.stereotype.Component;
  * @author roychen
  */
 
-// responsible for managing active spotify playback properties (eg. song, volume, etc.) and state
+// responsible for managing active spotify playback properties (eg. song, volume, etc.)
 @Component
 public class SpotifyPlayerState {
     

@@ -6,6 +6,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.spotify__server.components.SongUpdater;
 import com.spotify__server.components.SpotifyPlayerState;
 import com.spotify__server.components.accessers.database_access.DatabaseAccesser;
 
@@ -23,6 +24,9 @@ public class SpotifyStateUpdaterController {
 
     @Autowired
     private SpotifyPlayerState sps;
+
+    @Autowired
+    private SongUpdater song_updater;
     
     @ResponseBody @GetMapping("/1test")
     public String testPutMapping(HttpServletResponse response) {
@@ -84,7 +88,9 @@ public class SpotifyStateUpdaterController {
             JSONParser parser = new JSONParser();
             JSONObject obj = (JSONObject) parser.parse(req_body_string);
 
-            String song_uri = obj.getAsString("song_uri");
+            String song_id = obj.getAsString("song_id");
+            song_updater.updateSongStats(song_id);
+
 
         return "";
         } catch (Exception e) {

@@ -44,6 +44,9 @@ public class SongUpdater {
         }
     }
 
+    // will grab top however many songs that have a last_played value 
+    // in db ordered by date in descending order, remove all the songs that are not 
+    // in the user's playlist (eg. playlist_id == NULL)
     private void removeSongIfBelowTop200() {
         List<String> res = database_accesser.getListFromDb(2, "select `song_uri`, `playlist_id` from `songs` where `last_played` is not null order by `last_played` desc");
 
