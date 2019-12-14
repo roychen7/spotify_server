@@ -2,6 +2,7 @@ package com.spotify__server.components.accessers.database_access;
 
 import org.springframework.stereotype.Component;
 
+import com.spotify__server.modules.Playlist;
 import com.spotify__server.modules.Song;
 
 import org.springframework.cache.annotation.CachePut;
@@ -56,4 +57,8 @@ public class PlaylistDatabaseAccesser extends DatabaseAccesser {
     public List<String> updatePlaylistIds() {
         return getListFromDb(1, "select `playlist_id` from `playlists`");
     }
+
+	public List<Playlist> getAssociatedPlaylists(String artistId) {
+		return null;
+	}
 }

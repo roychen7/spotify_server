@@ -35,6 +35,11 @@ public class PlaylistAndSongInitializer implements Runnable, Initializer {
 
     @Override
     public void initialize() {
+        if (api_accesser != null) {
+            System.out.println("API ACCESSER EXISTS");
+        } else {
+            System.out.println("API ACCESSER DOES NOT EXIST");
+        }
         System.out.println("PlaylistAndSongInitializer::getUserId");
         try {
             String user_id = api_accesser.getUserId();

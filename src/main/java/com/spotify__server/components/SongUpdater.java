@@ -34,10 +34,12 @@ public class SongUpdater {
         Song song;
         try {
             song = api_accesser.getSongDetails(song_id);
-            database_accesser.insertIntoDb("insert into `songs` values('" + song.getPlaylistId() + "', '" + song.getUri() + "', '" + song.getName() + "', '" + 
+            String print;
+            database_accesser.insertIntoDb((print = "insert into `songs` values('" + song.getPlaylistId() + "', '" + song.getUri() + "', '" + song.getName() + "', '" + 
             Integer.toString(song.getDuration()) + "', '0', current_timestamp()) on duplicate key update `playcount`='" + 
-            incPlayCount(database_accesser.getSingleFromDb("select `playcount` from `songs` where `song_uri`='" + song.getUri() + "'")) + "', `last_played`=current_timestamp()");
-        
+            incPlayCount(database_accesser.getSingleFromDb("select `playcount` from `songs` where `song_uri`='" + song.getUri() + "'")) + "', `last_played`=current_timestamp()"));
+            
+            System.out.println("PRINT IS: " + print);
             removeSongIfBelowTop200();
         } catch (ParseException | IOException | net.minidev.json.parser.ParseException e) {
             e.printStackTrace();

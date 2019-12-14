@@ -7,29 +7,19 @@ package com.spotify__server.controllers;
 
 import com.spotify__server.components.SpotifyPlayer;
 import com.spotify__server.components.SpotifyPlayerState;
-import com.spotify__server.components.accessers.database_access.DatabaseAccesser;
 import com.spotify__server.components.accessers.database_access.PlaylistDatabaseAccesser;
 import com.spotify__server.enums.PlaylistGenStatus;
 import com.spotify__server.modules.PlaylistGenerator;
 import com.spotify__server.modules.Song;
 import com.spotify__server.utils.WeightedRandomGenerator;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Queue;
 
 import javax.servlet.http.HttpServletResponse;
 
-import net.minidev.json.JSONArray;
-import net.minidev.json.JSONObject;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.HttpClients;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
