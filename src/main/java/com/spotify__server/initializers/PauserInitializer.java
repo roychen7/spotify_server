@@ -4,8 +4,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import com.spotify__server.components.SpotifyPlayer;
-import com.spotify__server.components.SpotifyPlayerState;
+import com.spotify__server.components.managers.SpotifyPlayer;
+import com.spotify__server.components.managers.SpotifyPlayerState;
 
 public class PauserInitializer implements Initializer, Runnable {
 

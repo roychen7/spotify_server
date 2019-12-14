@@ -1,4 +1,4 @@
-package com.spotify__server.components;
+package com.spotify__server.components.function_performers;
 
 import java.io.IOException;
 import java.util.List;

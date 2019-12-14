@@ -1,14 +1,12 @@
 package com.spotify__server.controllers;
 
 import java.io.BufferedReader;
-import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.spotify__server.components.SongUpdater;
-import com.spotify__server.components.SpotifyPlayerState;
-import com.spotify__server.components.accessers.database_access.DatabaseAccesser;
+import com.spotify__server.components.function_performers.SongUpdater;
+import com.spotify__server.components.managers.SpotifyPlayerState;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PutMapping;

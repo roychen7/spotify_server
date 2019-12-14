@@ -1,4 +1,4 @@
-package com.spotify__server.components;
+package com.spotify__server.components.function_performers;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -6,11 +6,9 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.spotify__server.components.accessers.database_access.DatabaseAccesser;
 import com.spotify__server.components.accessers.database_access.PlaylistDatabaseAccesser;
 import com.spotify__server.components.accessers.spotify_api_access.SpotifyApiAccesser;
 import com.spotify__server.modules.Artist;
-import com.spotify__server.modules.Playlist;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

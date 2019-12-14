@@ -3,6 +3,7 @@ package com.spotify__server.components.accessers.spotify_api_access;
 // package dependencies
 import com.spotify__server.components.accessers.database_access.DatabaseAccesser;
 import com.spotify__server.components.accessers.database_access.PlaylistDatabaseAccesser;
+import com.spotify__server.components.data.Data;
 import com.spotify__server.modules.Artist;
 import com.spotify__server.modules.Song;
 import com.spotify__server.utils.HelperClass;
@@ -46,6 +47,9 @@ public class SpotifyApiAccesser {
 
     @Autowired
     private PlaylistDatabaseAccesser playlist_database_accesser;
+    
+    @Autowired
+    private Data data;
 
     private HttpClient client = HttpClients.createDefault();
 
@@ -88,6 +92,7 @@ public class SpotifyApiAccesser {
         for (int i = 0; i < resp_array.size(); i++) {
             JSONObject obj = (JSONObject) resp_array.get(i);
             ret_list.add(new Pair(obj.getAsString("id"), obj.getAsString("name")));
+            data.addToPlaylists(obj.getAsString("id"));
 
             database_accesser.insertIntoDb("insert ignore into `playlists` set `playlist_id`='"
                     + ret_list.get(i).getKey() + "', `playlist_name`='" + ret_list.get(i).getValue() + "'");
@@ -160,6 +165,7 @@ public class SpotifyApiAccesser {
             if (!insert_string.equals("")) {
                 System.out.println("INSERT STRING IS: " + insert_string);
                 database_accesser.insertIntoDb(insert_string);
+                data.addToSongs(song_id);
             }
 
             // if we have reached the 100th song, need to re-fetch the next however many

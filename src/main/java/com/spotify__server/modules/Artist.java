@@ -5,7 +5,6 @@ import java.util.PriorityQueue;
 public class Artist {
     private String artist_id;
     private String artist_name;
-    private PriorityQueue<Playlist> ordered_playlists;
 
     public Artist(String artist_id, String artist_name) {
         this.artist_id = artist_id;

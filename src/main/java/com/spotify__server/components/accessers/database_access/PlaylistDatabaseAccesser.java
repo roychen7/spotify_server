@@ -17,6 +17,7 @@ import java.util.Random;
 
 @Component
 public class PlaylistDatabaseAccesser extends DatabaseAccesser {
+    private int i = 0;
     
     public List<Song> getRandomPlaylistSongs(HashSet<String> completed_playlists) throws SQLException, IOException {
         List<String> playlist_ids = getPlaylistIds();
@@ -56,6 +57,20 @@ public class PlaylistDatabaseAccesser extends DatabaseAccesser {
     @CachePut(cacheNames="playlistNames")
     public List<String> updatePlaylistIds() {
         return getListFromDb(1, "select `playlist_id` from `playlists`");
+    }
+
+    // TODO: implement below 2 methods, will be the bulk of grabbing the playlists
+    @Cacheable(value="getArtistPlaylists", key = "'#p0'")
+    public int getArtistPlaylists(String artist) {
+        System.out.println("INSIDE GETARTISTPLAYLISTS");
+        return 0;
+    }
+
+    @CachePut(value="getArtistPlaylists", key = "'#p0'")
+    public int updateArtistsPlaylists(String artist) {
+        System.out.println("updateArtistsPlaylists" + " " + artist);
+        i++;
+        return i;
     }
 
 	public List<Playlist> getAssociatedPlaylists(String artistId) {

@@ -3,8 +3,8 @@ package com.spotify__server.initializers;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
-import com.spotify__server.components.SpotifyPlayer;
-import com.spotify__server.components.SpotifyPlayerState;
+import com.spotify__server.components.managers.SpotifyPlayer;
+import com.spotify__server.components.managers.SpotifyPlayerState;
 import com.spotify__server.components.accessers.spotify_api_access.SpotifyApiAccesser;
 
 import org.springframework.beans.factory.annotation.Autowired;
