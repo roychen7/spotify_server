@@ -5,8 +5,8 @@
  */
 package com.spotify__server.modules;
 
-import com.spotify__server.components.SpotifyPlayer;
-import com.spotify__server.components.SpotifyPlayerState;
+import com.spotify__server.components.managers.SpotifyPlayer;
+import com.spotify__server.components.managers.SpotifyPlayerState;
 import com.spotify__server.modules.Song;
 
 import java.io.IOException;

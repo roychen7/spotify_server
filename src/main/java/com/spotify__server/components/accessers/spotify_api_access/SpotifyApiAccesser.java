@@ -3,6 +3,8 @@ package com.spotify__server.components.accessers.spotify_api_access;
 // package dependencies
 import com.spotify__server.components.accessers.database_access.DatabaseAccesser;
 import com.spotify__server.components.accessers.database_access.PlaylistDatabaseAccesser;
+import com.spotify__server.components.data.Data;
+import com.spotify__server.modules.Artist;
 import com.spotify__server.modules.Song;
 import com.spotify__server.utils.HelperClass;
 
@@ -30,6 +32,7 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
+import java.util.Set;
 
 import javafx.util.Pair;
 
@@ -45,11 +48,14 @@ public class SpotifyApiAccesser {
 
     @Autowired
     private PlaylistDatabaseAccesser playlist_database_accesser;
+    
+    @Autowired
+    private Data data;
 
     private HttpClient client = HttpClients.createDefault();
 
     public String getUserId() throws ClientProtocolException, IOException, ParseException {
-
+        System.out.println("playlist_database_accesser::getUserId");
         HttpGet get = new HttpGet("https://api.spotify.com/v1/me");
         HttpHeaders headers = new HttpHeaders();
         headers.set("Access-Control-Allow-Origin", "http://localhost:3000");
@@ -71,6 +77,7 @@ public class SpotifyApiAccesser {
 
     public List<Pair<String, String>> getAndUpdatePlaylistIdsAndNames(String user_id)
             throws ClientProtocolException, IOException, ParseException {
+        System.out.println("SpotifyApiAccesser::getAndUpdatePlaylistIdsAndNames");
         HttpGet get = new HttpGet("https://api.spotify.com/v1/users/" + user_id + "/playlists");
         get.addHeader("Authorization", "Bearer " + database_accesser.getAccessToken());
         List<Pair<String, String>> ret_list = new ArrayList<>();
@@ -113,7 +120,7 @@ public class SpotifyApiAccesser {
     }
 
 
-    public void updatePlaylistSongsIntoDbFromApi(String playlist_id, int noOfResets)
+    public void updateSongsPlaylistsArtists(String playlist_id, int noOfResets)
             throws ClientProtocolException, IOException, ParseException {
         HttpGet get = new HttpGet("https://api.spotify.com/v1/playlists/" + playlist_id
                 + "/tracks?fields=items(added_at%2Ctrack(name%2Cid%2Cduration_ms%2Calbum%2Cartists%2Curi))");
@@ -127,12 +134,22 @@ public class SpotifyApiAccesser {
         JSONArray items_array = (JSONArray) obj.get("items");
 
         for (int i = 0; i < items_array.size(); i++) {
+            // grabbing relevant track information
             JSONObject ith_track = (JSONObject) items_array.get(i);
             JSONObject track_details = (JSONObject) ith_track.get("track");
             String song_name = track_details.getAsString("name");
             String song_id = track_details.getAsString("id");
             String song_duration = track_details.getAsString("duration_ms");
             String song_uri = track_details.getAsString("uri");
+            JSONArray artist_json_array = (JSONArray) track_details.get("artists");
+
+            // initializing song's artists in database
+            List<String> artist_id_list = new ArrayList<>();
+            for (int j = 0; j < artist_json_array.size(); j++) {
+                JSONObject temp_obj = (JSONObject) artist_json_array.get(i);
+                String artist_id = temp_obj.getAsString("id");
+                artist_id_list.add(artist_id);
+            }
 
             String insert_string = "";
 
@@ -141,22 +158,19 @@ public class SpotifyApiAccesser {
             int ind_of_quote = -1;
 
                 if ((ind_of_quote = song_name.indexOf("'")) == -1) {
-                    // insert_string = "insert ignore into `songs` set `playlist_id`='" + playlist_id + "', `song_id`='"
-                    //         + song_id + "', `song_uri`='" + song_uri + "', `song_name`='" + song_name + "', `song_duration`='" 
-                    //         + song_duration + "', `date_played`='" + null + "'";
-                    insert_string = "insert ignore into `songs` values ('" + playlist_id + "', '" + song_uri + "', '" + song_name + "', '" + 
-                    song_duration + "', '0', 'NULL'";
+                    insert_string = "insert ignore into `songs` values ('" + song_id + "', '" + song_uri + "', '" + song_name + "', '" + 
+                    song_duration + "', '0', NULL)";
                 } else {
                     String song_name_reformatted = handleQuotation(song_name, ind_of_quote);
-                    // insert_string = "insert ignore into `songs` set `playlist_id`='" + playlist_id + "', `song_id`='"
-                    //         + song_id + "', `song_uri`='" + song_uri + "', `song_name`='" + song_name_reformatted + "', `song_duration`='"
-                    //         + song_duration + "', `date_played`='" + null + "'";
-                    insert_string = "insert ignore into `songs` values ('" + playlist_id + "', '" + song_uri + "', '" + song_name_reformatted + "', '" + 
-                    song_duration + "', '0', 'NULL'";
+                    insert_string = "insert ignore into `songs` values ('" + song_id + "', '" + song_uri + "', '" + song_name_reformatted + "', '" + 
+                    song_duration + "', '0', NULL)";
                 }
 
             if (!insert_string.equals("")) {
+                System.out.println("INSERT STRING IS: " + insert_string);
                 database_accesser.insertIntoDb(insert_string);
+                updateSongsToPlaylistsTable(song_id, playlist_id);
+                updateSongsToArtistsTable(song_id, artist_id_list);
             }
 
             // if we have reached the 100th song, need to re-fetch the next however many
@@ -180,6 +194,25 @@ public class SpotifyApiAccesser {
                 items_array = (JSONArray) obj.get("items");
                 System.out.println("items_array size: " + items_array.size());
             }
+        }
+
+        eagerInitializeArtistsAssociatedPlaylists(data.getArtists());
+    }
+
+    private void eagerInitializeArtistsAssociatedPlaylists(Set<String> all_artist_ids) {
+        for (String s : all_artist_ids) {
+            playlist_database_accesser.updateAssociatedPlaylists(s);
+        }
+    }
+
+    private void updateSongsToPlaylistsTable(String song_id, String playlist_id) {
+        database_accesser.insertIntoDb("insert into `songsToPlaylists` values ('" + song_id + "', '" + playlist_id + "')"); 
+    }
+
+    private void updateSongsToArtistsTable(String song_id, List<String> artist_id_list) {
+        for (int i = 0; i < artist_id_list.size(); i++) {
+            database_accesser.insertIntoDb("insert into `songsToArtists` values ('" + song_id + "', '" + artist_id_list.get(i) + "')"); 
+            data.addToArtists(artist_id_list.get(i));
         }
     }
 
@@ -273,6 +306,22 @@ public class SpotifyApiAccesser {
         play_status = (boolean) obj.get("is_playing");
         return play_status;
     }
+
+	public List<Artist> getSongArtists(String song_id) throws ClientProtocolException, IOException, ParseException {
+        HttpGet get = new HttpGet("https://api.spotify.com/v1/tracks/" + song_id);
+        HttpResponse response = client.execute(get);
+        String response_string = EntityUtils.toString(response.getEntity());
+        JSONParser parser = new JSONParser();
+        JSONObject obj = (JSONObject) parser.parse(response_string);
+
+        List<Artist> ret_list = new ArrayList<>();
+        JSONArray artists = (JSONArray) obj.get("artists");
+        for (int i = 0; i < artists.size(); i++) {
+            ret_list.add(new Artist(((JSONObject)artists.get(i)).getAsString("id"), ((JSONObject)artists.get(i)).getAsString("name")));
+        }
+        
+        return ret_list;
+	}
 
 
     // helper function, appends a second "'" character everytime we encounter one 

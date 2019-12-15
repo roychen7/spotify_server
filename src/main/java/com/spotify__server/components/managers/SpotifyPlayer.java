@@ -1,4 +1,4 @@
-package com.spotify__server.components;
+package com.spotify__server.components.managers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

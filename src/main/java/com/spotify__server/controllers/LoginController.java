@@ -7,18 +7,12 @@ package com.spotify__server.controllers;
 
 import com.spotify__server.initializers.InitializeAll;
 import java.io.IOException;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import com.spotify__server.utils.HelperClass;
-import com.spotify__server.components.SpotifyPlayer;
-import com.spotify__server.components.SpotifyPlayerState;
+import com.spotify__server.components.managers.SpotifyPlayer;
+import com.spotify__server.components.managers.SpotifyPlayerState;
 import com.spotify__server.components.accessers.database_access.DatabaseAccesser;
 import com.spotify__server.components.accessers.spotify_api_access.SpotifyApiAccesser;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletResponse;
 
