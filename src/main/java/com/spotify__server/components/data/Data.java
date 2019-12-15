@@ -9,31 +9,17 @@ import org.springframework.stereotype.Component;
 // used for minimizing time taken to refresh database data by preventing unnecessary queries through checking with set.contains()
 @Component
 public class Data {
-    private Set<String> song_ids = new HashSet<>();
-    private Set<String> playlist_ids = new HashSet<>();
     private Set<String> artist_ids = new HashSet<>();
-
-    public void addToSongs(String id) {
-        song_ids.add(id);
-    }
-
-    public void addToPlaylists(String id) {
-        playlist_ids.add(id);
-    }
 
     public void addToArtists(String id) {
         artist_ids.add(id);
     }
 
-    public boolean containsSong(String id) {
-        return song_ids.contains(id);
-    }
-
-    public boolean containsPlaylist(String id) {
-        return playlist_ids.contains(id);
-    }
-
     public boolean containsArtist(String id) {
         return artist_ids.contains(id);
+    }
+
+    public Set<String> getArtists() {
+        return artist_ids;
     }
 }

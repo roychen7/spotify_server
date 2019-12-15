@@ -40,7 +40,7 @@ public class PlaylistAndSongInitializer implements Runnable, Initializer {
         } else {
             System.out.println("API ACCESSER DOES NOT EXIST");
         }
-        System.out.println("PlaylistAndSongInitializer::getUserId");
+        System.out.println("PlaylistAndSongInitializer::initialize");
         try {
             String user_id = api_accesser.getUserId();
             List<Pair<String, String>> playlist_ids_and_names = api_accesser.getAndUpdatePlaylistIdsAndNames(user_id);
@@ -63,7 +63,8 @@ public class PlaylistAndSongInitializer implements Runnable, Initializer {
             System.out.println("INITIALIZING CURRENT PLAYLIST EQUALS = " + i);
 
             // pass playlist id into function from key-value pair
-            api_accesser.updatePlaylistSongsIntoDbFromApi(list_playlist_ids_names.get(i).getKey(), 0);
+            // update songs, playlists, and artists database table data in one-pass as it is the quickest way
+            api_accesser.updateSongsPlaylistsArtists(list_playlist_ids_names.get(i).getKey(), 0);
         }
     }
 }

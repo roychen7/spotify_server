@@ -13,4 +13,8 @@ public class Playlist {
     private String playlist_name;
     private String playlist_id;
     private double average_song_playcount;
+
+    public Playlist(String playlist_id) {
+        this.playlist_id = playlist_id;
+    }
 }
