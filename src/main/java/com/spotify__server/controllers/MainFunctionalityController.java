@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.spotify__server.components.managers.SpotifyPlayer;
 import com.spotify__server.components.managers.SpotifyPlayerState;
 import com.spotify__server.components.accessers.database_access.PlaylistDatabaseAccesser;
+import com.spotify__server.components.function_performers.AutoPlaylistAdder;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -51,6 +52,9 @@ public class MainFunctionalityController {
     @Autowired
     private PlaylistDatabaseAccesser playlist_database_accesser;
 
+    @Autowired
+    private AutoPlaylistAdder auto_playlist_adder;
+    
     @ResponseBody
     @GetMapping("/init_generator")
     public String initBiasedPlaylist(HttpServletResponse response) throws SQLException, IOException {
@@ -101,8 +105,9 @@ public class MainFunctionalityController {
             JSONParser parser = new JSONParser();
             JSONObject obj = (JSONObject) parser.parse(req_body_string);
 
-            String req_body_value = obj.getAsString("value");
-            // List<String> results = 
+            String in_song_id = obj.getAsString("value");
+            List<String> results = auto_playlist_adder.getPlaylistRecommendations(in_song_id);
+            
         } catch (IOException e) {
             System.out.println("caught IOException, " + e.toString());
         } catch (ParseException e) {

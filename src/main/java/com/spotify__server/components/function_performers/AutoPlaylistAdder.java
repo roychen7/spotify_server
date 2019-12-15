@@ -41,13 +41,13 @@ public class AutoPlaylistAdder {
         Set<String> return_set = new LinkedHashSet<>();
 
         for (int i = 0; i < songArtists.size(); i++) {
-            getPlayslistsFromArtist(songArtists.get(i), return_set);
+            return_set.addAll(playlist_database_accesser.getAssociatedPlaylists(songArtists.get(i).getArtistId()));
         }
 
         return new ArrayList<>(return_set);
     }
 
     private void getPlayslistsFromArtist(Artist artist, Set return_set) {
-        // List<Playlist> associated_playlists = 
+
     }
 }
