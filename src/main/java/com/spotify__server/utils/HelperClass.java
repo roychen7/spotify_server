@@ -46,7 +46,10 @@ public class HelperClass {
     // value is response code of api call, 2xx if valid token and 4xx if invalid token
 
     // TODO: refactor to return true or false instead of int code
-    public static int verifyToken(String str) throws MalformedURLException, IOException {        
+    public static int verifyToken(String str) throws MalformedURLException, IOException {  
+        if (str.equals("")) {
+            return 4;
+        }      
         HttpClient client = HttpClients.createDefault();
         HttpGet get = new HttpGet("https://api.spotify.com/v1/me/player");
         get.setHeader("Authorization", "Bearer " + str);
@@ -55,7 +58,7 @@ public class HelperClass {
         try {
             HttpResponse response = client.execute(get);
             code = response.getStatusLine().getStatusCode();
-//            System.out.println("THE CODE IS " +Integer.toString(code));
+           System.out.println("THE CODE IS " +Integer.toString(code));
         } catch (Error e) {
             throw e;
         }

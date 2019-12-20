@@ -63,7 +63,7 @@ public class TokenController {
         headers.set("Access-Control-Allow-Origin", "http://localhost:3000");
 
         String ress = database_accesser.getAccessToken();
-         
+        System.out.println(database_accesser.getAccessToken());
         return new ResponseEntity<>(ress, headers, HttpStatus.ACCEPTED);
     }  
     

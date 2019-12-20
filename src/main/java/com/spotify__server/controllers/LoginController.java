@@ -57,6 +57,7 @@ public class LoginController {
         synchronized (LoginController.class) {
             try {
                 while (Integer.toString(responseCode = HelperClass.verifyToken(database_accesser.getAccessToken())).charAt(0) != "2".charAt(0)) {
+                    System.out.println(database_accesser.getAccessToken());
                     System.out.println("/login right before waiting");
                     LoginController.class.wait();
                     System.out.println("/login awoke from waiting");

@@ -5,7 +5,7 @@ import java.util.Set;
 
 import org.springframework.stereotype.Component;
 
-// "Data" class contains the ids of existing songs, playlists, and artists that are currently stored in the database
+// "Data" class contains the ids of existing artists that are currently stored in the database
 // used for minimizing time taken to refresh database data by preventing unnecessary queries through checking with set.contains()
 @Component
 public class Data {
