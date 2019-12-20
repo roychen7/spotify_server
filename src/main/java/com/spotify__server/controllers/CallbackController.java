@@ -70,7 +70,7 @@ public class CallbackController {
         params.add(new BasicNameValuePair("grant_type", "authorization_code"));
         params.add(new BasicNameValuePair("code", code));
         params.add(new BasicNameValuePair("redirect_uri", "http://localhost:8080/callback"));
-        params.add(new BasicNameValuePair("scope", "user-modify-playback-state"));
+        params.add(new BasicNameValuePair("scope", "user-modify-playback-state streaming user-read-private user-read-playback-state"));
         httpPost.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
 
         // execute the post, save response
