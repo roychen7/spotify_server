@@ -5,7 +5,6 @@ import java.util.List;
 
 import com.spotify__server.components.accessers.database_access.DatabaseAccesser;
 import com.spotify__server.components.accessers.spotify_api_access.GetInfoApi;
-import com.spotify__server.components.accessers.spotify_api_access.SpotifyApiAccesser;
 import com.spotify__server.modules.Song;
 
 import org.apache.http.ParseException;

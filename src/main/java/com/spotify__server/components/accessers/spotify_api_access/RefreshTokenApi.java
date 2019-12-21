@@ -1,8 +1,6 @@
 package com.spotify__server.components.accessers.spotify_api_access;
 
 import com.spotify__server.components.accessers.database_access.DatabaseAccesser;
-import com.spotify__server.components.accessers.database_access.PlaylistDatabaseAccesser;
-import com.spotify__server.components.data.Data;
 import com.spotify__server.utils.HelperClass;
 
 import net.minidev.json.parser.JSONParser;

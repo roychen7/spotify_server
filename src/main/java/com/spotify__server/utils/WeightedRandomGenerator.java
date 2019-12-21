@@ -6,15 +6,12 @@
 package com.spotify__server.utils;
 
 import com.spotify__server.modules.Song;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.NavigableMap;
 import java.util.Queue;
 import java.util.Random;
-import java.util.Set;
 import java.util.TreeMap;
 
 /**
