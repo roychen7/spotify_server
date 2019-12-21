@@ -5,6 +5,7 @@
  */
 package com.spotify__server.components.managers;
 
+import com.spotify__server.components.accessers.spotify_api_access.GetInfoApi;
 import com.spotify__server.components.accessers.spotify_api_access.SpotifyApiAccesser;
 import com.spotify__server.enums.PlaylistGenStatus;
 import com.spotify__server.modules.Song;
@@ -26,7 +27,7 @@ import org.springframework.stereotype.Component;
 public class SpotifyPlayerState {
     
     @Autowired
-    private SpotifyApiAccesser api_accesser;
+    private GetInfoApi info_api_accesser;
 
     private int connected;
     public final String test = "";
@@ -39,7 +40,7 @@ public class SpotifyPlayerState {
         
         completed_playlists = new HashSet<>();
         try {
-            play_status = api_accesser.getPlayStatus();
+            play_status = info_api_accesser.getPlayStatus();
         } catch (IOException e) {
             e.printStackTrace();
         } catch (ParseException e) {

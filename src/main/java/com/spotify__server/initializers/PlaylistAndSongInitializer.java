@@ -5,6 +5,7 @@
  */
 package com.spotify__server.initializers;
 
+import com.spotify__server.components.accessers.spotify_api_access.GetInfoApi;
 import com.spotify__server.components.accessers.spotify_api_access.SpotifyApiAccesser;
 
 import org.apache.http.client.ClientProtocolException;
@@ -21,10 +22,10 @@ import net.minidev.json.parser.ParseException;
 
 public class PlaylistAndSongInitializer implements Runnable, Initializer {
 
-    private SpotifyApiAccesser api_accesser;  
+    private GetInfoApi info_api_accesser;  
 
-    public PlaylistAndSongInitializer (SpotifyApiAccesser api_accesser) {
-        this.api_accesser = api_accesser;
+    public PlaylistAndSongInitializer (GetInfoApi info_api_accesser) {
+        this.info_api_accesser = info_api_accesser;
     }
     
 
@@ -42,8 +43,8 @@ public class PlaylistAndSongInitializer implements Runnable, Initializer {
         }
         System.out.println("PlaylistAndSongInitializer::initialize");
         try {
-            String user_id = api_accesser.getUserId();
-            List<Pair<String, String>> playlist_ids_and_names = api_accesser.getAndUpdatePlaylistIdsAndNames(user_id);
+            String user_id = info_api_accesser.getUserId();
+            List<Pair<String, String>> playlist_ids_and_names = info_api_accesser.getAndUpdatePlaylistIdsAndNames(user_id);
             initPlaylistSongs(playlist_ids_and_names);  
         } catch (ClientProtocolException e) {
             System.out.println("Encountered ClientProtocolException error");
@@ -64,7 +65,7 @@ public class PlaylistAndSongInitializer implements Runnable, Initializer {
 
             // pass playlist id into function from key-value pair
             // update songs, playlists, and artists database table data in one-pass as it is the quickest way
-            api_accesser.updateSongsPlaylistsArtists(list_playlist_ids_names.get(i).getKey(), 0);
+            info_api_accesser.updateSongsPlaylistsArtists(list_playlist_ids_names.get(i).getKey(), 0);
         }
     }
 }

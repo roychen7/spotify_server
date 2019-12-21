@@ -11,10 +11,10 @@ import com.spotify__server.components.accessers.spotify_api_access.SpotifyApiAcc
 
 public class RefreshTokenInitializer implements Initializer, Runnable {
 
-    private SpotifyApiAccesser api_accesser;
+    private SpotifyApiAccesser refresh_api_accesser;
 
     public RefreshTokenInitializer(SpotifyApiAccesser api_accesser) {
-        this.api_accesser = api_accesser;
+        this.refresh_api_accesser = refresh_api_accesser;
     }
     
     @Override
@@ -32,7 +32,7 @@ public class RefreshTokenInitializer implements Initializer, Runnable {
 
         public void run() {
             try {
-                api_accesser.refreshToken();
+                refresh_api_accesser.refreshToken();
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             } catch (SQLException e) {

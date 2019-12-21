@@ -10,7 +10,6 @@ package com.spotify__server.modules;
  * @author roychen
  */
 public class Song {
-    private String playlist_id;
     private String name;
     private String uri;
     private int duration_ms;
@@ -25,8 +24,7 @@ public class Song {
         calculateWeight(playcount);
     }
     
-    public Song(String playlist_id, String song_uri, String song_name, String song_duration) {
-        this.playlist_id = playlist_id;
+    public Song(String song_uri, String song_id, String song_name, String song_duration) {
         this.uri = song_uri;
         this.name = song_name;
         this.duration_ms = Integer.parseInt(song_duration);
@@ -74,9 +72,4 @@ public class Song {
     public int hashCode() {
         return uri.hashCode();
     }
-
-	public String getPlaylistId() {
-		return playlist_id;
-	}
-
 }

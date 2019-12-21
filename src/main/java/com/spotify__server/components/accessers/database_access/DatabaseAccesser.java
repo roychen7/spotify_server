@@ -30,8 +30,8 @@ import java.util.logging.Logger;
 @Primary
 public class DatabaseAccesser {
 
-    // below are generic functions that shouldn't have results cached
-    public boolean insertIntoDb(String query) {
+    // below are generic database-accessing functions
+    public boolean updateIntoDb(String query) {
         try (Connection con = JdbcRepository.getConnection()) {
             Statement stmt = con.createStatement();
             stmt.executeUpdate(query);

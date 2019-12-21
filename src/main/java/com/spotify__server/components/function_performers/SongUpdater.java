@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 
 import com.spotify__server.components.accessers.database_access.DatabaseAccesser;
+import com.spotify__server.components.accessers.spotify_api_access.GetInfoApi;
 import com.spotify__server.components.accessers.spotify_api_access.SpotifyApiAccesser;
 import com.spotify__server.modules.Song;
 
@@ -18,24 +19,19 @@ public class SongUpdater {
     private DatabaseAccesser database_accesser;
 
     @Autowired
-    private SpotifyApiAccesser api_accesser;
+    private GetInfoApi info_api_accesser;
 
     public void updateSongStats(String song_id) {
         // 1. update song playcount
         // 2. update song last played date
         // if song entry exists in the database, update its playcount and last played
-        // date
-        // else insert new song
-        // 3. remove song from `songs` table if song doesn't exist in any of user's
-        // playlists AND there are 200 or more songs that
-        // have been played before the given song (regardless if these songs were in the
-        // user's playlists or not)
+        // date, else insert song into the database table `songs`
 
         Song song;
         try {
-            song = api_accesser.getSongDetails(song_id);
+            song = info_api_accesser.getSongDetails(song_id);
             String print;
-            database_accesser.insertIntoDb((print = "insert into `songs` values('" + song.getPlaylistId() + "', '" + song.getUri() + "', '" + song.getName() + "', '" + 
+            database_accesser.updateIntoDb((print = "insert into `songs` values('" + song_id + "', '" + song.getUri() + "', '" + song.getName() + "', '" + 
             Integer.toString(song.getDuration()) + "', '0', current_timestamp()) on duplicate key update `playcount`='" + 
             incPlayCount(database_accesser.getSingleFromDb("select `playcount` from `songs` where `song_uri`='" + song.getUri() + "'")) + "', `last_played`=current_timestamp()"));
             
@@ -47,7 +43,8 @@ public class SongUpdater {
     }
 
     // will grab top however many songs that have a last_played value 
-    // in db ordered by date in descending order, remove all the songs that are not 
+    // in db ordered by date in descending order, remove all the songs that are not in the top 
+    // 200 recently played, AND also not 
     // in the user's playlist (eg. playlist_id == NULL)
     private void removeSongIfBelowTop200() {
         List<String> res = database_accesser.getListFromDb(2, "select `song_uri`, `playlist_id` from `songs` where `last_played` is not null order by `last_played` desc");
@@ -60,12 +57,13 @@ public class SongUpdater {
                 if ((visible = res.get(i+1)).equals("NULL")) {
                     System.out.println(visible);
                     String song_uri = res.get(i);
-                    database_accesser.insertIntoDb("delete from `songs` where `song_uri`='" + song_uri + "'");
+                    database_accesser.updateIntoDb("delete from `songs` where `song_uri`='" + song_uri + "'");
                 }
             }
         }
     }
 
+    // inc play count helper for current song in removeSongIfBelowTop200() 
     private String incPlayCount(String playCount) {
         return Integer.toString(Integer.parseInt(playCount) + 1);
     }

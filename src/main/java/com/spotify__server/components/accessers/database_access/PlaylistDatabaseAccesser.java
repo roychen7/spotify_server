@@ -19,8 +19,8 @@ import java.util.Random;
 
 @Component
 public class PlaylistDatabaseAccesser extends DatabaseAccesser {
-    private int i = 0;
     
+    // grabs all the songs associated with the randomly selected playlist from the user's playlist db table
     public List<Song> getRandomPlaylistSongs(HashSet<String> completed_playlists) throws SQLException, IOException {
         List<String> playlist_ids = getPlaylistIds();
         Random random = new Random();
@@ -61,27 +61,16 @@ public class PlaylistDatabaseAccesser extends DatabaseAccesser {
         return getListFromDb(1, "select `playlist_id` from `playlists`");
     }
 
-    // TODO: implement below 2 methods, will be the bulk of grabbing the playlists
-    @Cacheable(value="getArtistPlaylists", key = "'#p0'")
-    public int getArtistPlaylists(String artist) {
-        System.out.println("INSIDE GETARTISTPLAYLISTS");
-        return 0;
-    }
-
-    @CachePut(value="getArtistPlaylists", key = "'#p0'")
-    public int updateArtistsPlaylists(String artist) {
-        System.out.println("updateArtistsPlaylists" + " " + artist);
-        i++;
-        return i;
-    }
-
     // this method will never execute and will instead return the cached result stored by the eager initialization of updateAssociatedPlaylists()
     @Cacheable(value="getAssociatedPlaylists", key = "'#p0'")
     public List<String> getAssociatedPlaylists(String artistId) {
         return null;
     }
 
-    // returns playlists associated with the artistId in order from highest to lowest, and only those that satisfy constraint
+    // returns playlists associated with the artistId in order from highest to lowest number of appearances
+    // in said playlist, and only those whose appearance count are >= the constraint 
+    // (set by the top playlist appearance count divided by 2). This is to grab the most relevant recommendations
+    // for playlists that the user owns, that are associated with the artist
     @CachePut(value="getAssociatedPlaylists", key = "'#p0'")
     public List<Playlist> updateAssociatedPlaylists(String artistId) {
         List<String> results = getListFromDb(1, "select songsToPlaylists.playlist_id from songsToArtists inner join " +
@@ -111,7 +100,8 @@ public class PlaylistDatabaseAccesser extends DatabaseAccesser {
     }
 
         
-    // returns list of playlists in the max priority queue that satisfy constraint
+    // returns list of playlists in the max priority queue that satisfy constraint, returns once 
+    // we dip below the constraint
     private List<Playlist> getQualifyingPlaylistsFromPQ(PriorityQueue<ArtistPlaylistAppearanceCount> max_playlist_pq) {
         List<Playlist> ret = new ArrayList<>();
         if (max_playlist_pq.isEmpty()) {
@@ -130,6 +120,8 @@ public class PlaylistDatabaseAccesser extends DatabaseAccesser {
         return ret;
     }
 
+    // class for comparing playlists by pairing together artist appearance count, along with the 
+    // respective playlist
     static class ArtistPlaylistAppearanceCount {
         private int artist_count;
         private Playlist playlist;
@@ -148,6 +140,7 @@ public class PlaylistDatabaseAccesser extends DatabaseAccesser {
         }
     }
     
+    // function to use as comparator for priority queue
     static class comparePlaylists implements Comparator <ArtistPlaylistAppearanceCount> {
 
         @Override
