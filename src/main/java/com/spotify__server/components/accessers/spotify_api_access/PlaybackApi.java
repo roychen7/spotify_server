@@ -20,7 +20,7 @@ import java.io.IOException;
 
 //TODO: refactor this entire class into the 3 api accesser classes
 @Component
-public class SpotifyApiAccesser {
+public class PlaybackApi {
 
     @Autowired
     private DatabaseAccesser database_accesser;

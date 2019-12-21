@@ -7,7 +7,8 @@ package com.spotify__server.controllers;
 
 import com.spotify__server.components.managers.SpotifyPlayerState;
 import com.spotify__server.components.accessers.database_access.DatabaseAccesser;
-import com.spotify__server.components.accessers.spotify_api_access.SpotifyApiAccesser;
+import com.spotify__server.components.accessers.spotify_api_access.GetInfoApi;
+import com.spotify__server.components.accessers.spotify_api_access.PlaybackApi;
 
 import java.io.IOException;
 
@@ -40,7 +41,10 @@ public class PlayerController {
     private DatabaseAccesser database_accesser;
 
     @Autowired
-    private SpotifyApiAccesser api_accesser;
+    private PlaybackApi playback_api_accesser;
+
+    @Autowired
+    private GetInfoApi info_api_accesser;
 
     @ResponseBody
     @GetMapping("toggle_playback")
@@ -49,13 +53,13 @@ public class PlayerController {
         Boolean is_playing;
         System.out.println("PlayerController::togglePlayback()");
         try {
-            if ((is_playing = api_accesser.getPlayStatus()) != null) {
+            if ((is_playing = info_api_accesser.getPlayStatus()) != null) {
                 System.out.println("PlayerController::togglePlayback() after is_playing " + is_playing.toString());
                 if (is_playing) {
-                    api_accesser.togglePause();
+                    playback_api_accesser.togglePause();
                     System.out.println("PlayerController::togglePlayback() api_accesser toggle pause");
                 } else {
-                    api_accesser.togglePlay();
+                    playback_api_accesser.togglePlay();
                     System.out.println("PlayerController::togglePlayback() api_accesser toggle play");
                 }
             }

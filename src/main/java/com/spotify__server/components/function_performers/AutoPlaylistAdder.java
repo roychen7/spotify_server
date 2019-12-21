@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.spotify__server.components.accessers.database_access.PlaylistDatabaseAccesser;
+import com.spotify__server.components.accessers.spotify_api_access.GetInfoApi;
 import com.spotify__server.components.accessers.spotify_api_access.SpotifyApiAccesser;
 import com.spotify__server.modules.Artist;
 
@@ -19,14 +20,15 @@ import net.minidev.json.parser.ParseException;
 public class AutoPlaylistAdder {
 
     @Autowired
-    private SpotifyApiAccesser api_accesser;
+    private GetInfoApi info_api_accesser;
 
     @Autowired
     private PlaylistDatabaseAccesser playlist_database_accesser;
 
+    // returns playlist recommendations for given song id (by grabbing the artists)
     public List<String> getPlaylistRecommendations(String song_id) {
         try {
-            List<Artist> songArtists = api_accesser.getSongArtists(song_id);
+            List<Artist> songArtists = info_api_accesser.getSongArtists(song_id);
             return getPlaylistsForArtists(songArtists);
 
         } catch (IOException | ParseException e) {
@@ -45,9 +47,5 @@ public class AutoPlaylistAdder {
         }
 
         return new ArrayList<>(return_set);
-    }
-
-    private void getPlayslistsFromArtist(Artist artist, Set return_set) {
-
     }
 }

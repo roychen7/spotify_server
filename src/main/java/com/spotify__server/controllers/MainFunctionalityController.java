@@ -33,9 +33,6 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Queue;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PutMapping;
 
 // class for main functionality of the program, including generating playlist mode, retrieving recent 200 songs,
 // and automatically adding to playlists
