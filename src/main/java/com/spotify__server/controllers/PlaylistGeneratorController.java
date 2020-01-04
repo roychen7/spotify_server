@@ -1,3 +1,7 @@
+// THIS CLASS IS DEPRECATED, moved to MainFunctionality.java
+
+
+
 // /*
 //  * To change this license header, choose License Headers in Project Properties.
 //  * To change this template file, choose Tools | Templates
@@ -34,7 +38,6 @@
 // import net.minidev.json.JSONObject;
 // import net.minidev.json.parser.JSONParser;
 // import net.minidev.json.parser.ParseException;
-// THIS CLASS IS DEPRECATED, moved to MainFunctionality.java
 // /**
 //  *
 //  * @author roychen
