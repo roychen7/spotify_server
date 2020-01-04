@@ -1,0 +1,32 @@
+CREATE TABLE playlists (
+    playlist_id varchar(50),
+    playlist_name varchar(300), 
+    primary key (playlist_id)
+)
+
+CREATE TABLE songs (
+    song_id varchar(50), 
+    song_uri varchar(100), 
+    song_name varchar(300), 
+    song_duration varchar(50),
+    playcount varchar(50),
+    last_played datetime, 
+)
+
+CREATE TABLE songsToArtists (
+    song_id varchar(50), 
+    song_name varchar(300), 
+    artist_id varchar(50),
+    primary key (song_id, artist_id)
+)
+
+CREATE TABLE songsToPlaylists (
+    song_id varchar(50),
+    song_name varchar(300),
+    playlist_id varchar(50)
+)
+
+CREATE TABLE token (
+    access_token varchar(100),
+    refresh_token varchar(100)
+)
