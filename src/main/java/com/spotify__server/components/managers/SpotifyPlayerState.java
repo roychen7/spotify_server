@@ -29,7 +29,6 @@ public class SpotifyPlayerState {
     private GetInfoApi info_api_accesser;
 
     private int connected;
-    public final String test = "";
     private boolean play_status;
     private PlaylistGenStatus pgs;
     private Queue<Song> play_queue;

@@ -25,11 +25,6 @@ public class SpotifyStateUpdaterController {
 
     @Autowired
     private SongUpdater song_updater;
-    
-    @ResponseBody @GetMapping("/1test")
-    public String testPutMapping(HttpServletResponse response) {
-        return "";
-    }
 
     @ResponseBody @PutMapping("/update_play_status")
     public String updatePlayStatus(HttpServletResponse response, HttpServletRequest request) {
