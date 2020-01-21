@@ -1,8 +1,6 @@
 package com.spotify__server.components.accessers.spotify_api_access;
 
 import com.spotify__server.components.accessers.database_access.DatabaseAccesser;
-import com.spotify__server.components.accessers.database_access.PlaylistDatabaseAccesser;
-import com.spotify__server.components.data.Data;
 import com.spotify__server.modules.Artist;
 import com.spotify__server.modules.Song;
 import com.spotify__server.utils.HelperClass;
@@ -33,7 +31,7 @@ public class GetInfoApi {
 
     @Autowired
     private DatabaseAccesser database_accesser;
-    
+
     private HttpClient client = HttpClients.createDefault();
 
     // accesses spotify API to return user ID using access token

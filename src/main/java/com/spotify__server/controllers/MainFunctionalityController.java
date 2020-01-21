@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.spotify__server.components.managers.SpotifyPlayer;
 import com.spotify__server.components.managers.SpotifyPlayerState;
+import com.spotify__server.components.accessers.database_access.DatabaseAccesser;
 import com.spotify__server.components.accessers.database_access.PlaylistDatabaseAccesser;
 import com.spotify__server.components.function_performers.AutoPlaylistAdder;
 
@@ -50,6 +51,9 @@ public class MainFunctionalityController {
     private PlaylistDatabaseAccesser playlist_database_accesser;
 
     @Autowired
+    private DatabaseAccesser db_accesser;
+
+    @Autowired
     private AutoPlaylistAdder auto_playlist_adder;
     
     @ResponseBody
@@ -73,17 +77,18 @@ public class MainFunctionalityController {
         return "OK";
     }
 
-    // TODO refactor make a playlist managing component, implement get 200 songs
-    // method and move existing playlist properties to that class
-    @RequestMapping(value = "/recent_200", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Map<String, String> getRecent200Songs(HttpServletResponse response) {
+    // grabs the most recent 200 songs
+    @RequestMapping(value = "/recent", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<String> getRecent200Songs(HttpServletResponse response) {
         response.addHeader("Access-Control-Allow-Origin", "http://localhost:3000");
 
-        return Collections.singletonMap("response", "hello!");
+        return db_accesser.getListFromDb(2, "select song_name, song_id from songs order by last_played desc limit 200")
+        // return Collections.singletonMap("response", "hello!");
     }
 
+    // grabs suggested playlists from artist id
     @RequestMapping(value = "/suggested_playlists", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Map<String, String> getSuggestedPlaylists(HttpServletResponse response, HttpServletRequest request)
+    public List<String> getSuggestedPlaylists(HttpServletResponse response, HttpServletRequest request)
             throws IOException, ParseException {
         response.addHeader("Access-Control-Allow-Origin", "http://localhost:3000");
         response.addHeader("Access-Control-Allow-Methods", "PUT");
@@ -104,12 +109,21 @@ public class MainFunctionalityController {
 
             String in_song_id = obj.getAsString("value");
             List<String> results = auto_playlist_adder.getPlaylistRecommendations(in_song_id);
-            
+            return results;
+
         } catch (IOException e) {
             System.out.println("caught IOException, " + e.toString());
         } catch (ParseException e) {
             System.out.println("caught parseException, " + e.toString());
         }
         return null;
+    }
+
+    @RequestMapping(value = "/playlists", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<String> getPlaylists(HttpServletResponse response) {
+        response.addHeader("Access-Control-Allow-Origin", "http://localhost:3000");
+
+        return playlist_database_accesser.getPlaylistIds();
+        // return Collections.singletonMap("response", "hello!");
     }
 }
